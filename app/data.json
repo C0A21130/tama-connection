@@ -1,0 +1,31 @@
+{
+    "1.png": {
+        "title": "hoge",
+        "tag": "gurume",
+        "text": "hoge,hoge,hoge",
+        "other": {
+            "user": "test_user",
+            "location_information": {
+                "ken": "tokyo",
+                "city": "hatiouji",
+                "x": 100,
+                "y": 200
+            }
+        }
+    },
+    "2.png":{
+        "title": "test",
+        "tag": "kankou",
+        "text": "test,test,test",
+        "other": {
+            "user": "test_user",
+            "location_information": {
+                "ken": "tokyo",
+                "city": "hatiouji",
+                "x": 120,
+                "y": 180
+            } 
+        }
+    }
+    
+}
