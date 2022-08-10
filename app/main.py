@@ -32,12 +32,15 @@ async def get_page(tag: str="kankou"):
     with open(data, mode="r", encoding="utf-8") as f:
         d = json.loads(f.read())
         for i in search_result:
-            result[i] = d[i]
+            result[str(i)] = d[str(i)]
 
     # 該当するファイルのメタデータを返す
     return result
 
 # マップにピンを表示するための情報を与える関数
 @app.get("/map")
-def get_location():
-    return {"1.png":{"tag":"kankou","location":[100, 120]}}
+def get_location(x:int, y:int):
+
+    # return {"1.png":{"tag":"kankou","location":[100, 120]}}
+    return {"x": x, "y": y}
+
