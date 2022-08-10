@@ -1,6 +1,7 @@
 from fastapi import FastAPI
 import json
 import random
+import math
 
 app = FastAPI()
 
@@ -39,12 +40,17 @@ async def get_page(tag: str="kankou"):
 
 # マップにピンを表示するための情報を与える関数
 @app.get("/map")
-def get_location(x:int, y:int):
+def get_location(myx:int, myy:int):
     search = "./search.json"
+    dists = []
 
     with open(search, mode="r", encoding="utf-8") as f:
         jn = json.loads(f.read())["locations"]
 
+        for i in jn:
+            x = i[0]
+            y = i[1]
+            dists.append(math.sqrt(x*x + y*y))
 
     # return {"1.png":{"tag":"kankou","location":[100, 120]}}
-    return {"locations": jn}
+    return {"locations": dists}
