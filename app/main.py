@@ -40,7 +40,11 @@ async def get_page(tag: str="kankou"):
 # マップにピンを表示するための情報を与える関数
 @app.get("/map")
 def get_location(x:int, y:int):
+    search = "./search.json"
+
+    with open(search, mode="r", encoding="utf-8") as f:
+        jn = json.loads(f.read())["locations"]
+
 
     # return {"1.png":{"tag":"kankou","location":[100, 120]}}
-    return {"x": x, "y": y}
-
+    return {"locations": jn}
