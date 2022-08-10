@@ -18,20 +18,22 @@ def get_page():
     search_result = []
     result = dict()
 
+    # タグから該当するファイルを検索する
     with open(search, mode="r", encoding="utf-8") as f:
         jn = json.loads(f.read())["tags"]
         num = jn[tag]["num"]
         file = jn[tag]["file"]
 
-        rand = random.randint(0,num-1)
-        search_result.append(file[rand])
-        # for i in range(10):
-        #     rand = random.randint(0,num-1)
-        #     search_result.append(file[rand])
+        # 10個ファイルを検索する
+        for i in range(10):
+            rand = random.randint(0,num-1)
+            search_result.append(file[rand])
 
+    # 該当したファイルのメタデータを辞書に保存する
     with open(data, mode="r", encoding="utf-8") as f:
         d = json.loads(f.read())
-        for i in file:
+        for i in search_result:
             result[i] = d[i]
 
+    # 該当するファイルのメタデータを返す
     return result

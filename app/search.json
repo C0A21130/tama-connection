@@ -1,8 +1,8 @@
 {
     "tags": {
         "kankou": {
-            "num" : 1,
-            "file": ["1.png"]
+            "num" : 2,
+            "file": ["1.png", "2.png"]
         },
         "gurume": {
             "num": 1,
