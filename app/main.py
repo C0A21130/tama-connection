@@ -8,7 +8,7 @@ app = FastAPI()
 def hello():
     return {"hello" : "Hello World"}
 
-# 投稿したページをタグから検索して表示する
+# 投稿したページをタグから検索して表示する関数
 @app.get("/page")
 async def get_page(tag: str="kankou"):
     data = "./data.json"
@@ -36,3 +36,8 @@ async def get_page(tag: str="kankou"):
 
     # 該当するファイルのメタデータを返す
     return result
+
+# マップにピンを表示するための情報を与える関数
+@app.get("/map")
+def get_location():
+    return {"1.png":{"tag":"kankou","location":[100, 120]}}
