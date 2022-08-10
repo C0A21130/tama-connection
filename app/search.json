@@ -2,27 +2,25 @@
     "tags": {
         "kankou": {
             "num" : 2,
-            "file": ["1.png", "2.png"]
+            "file": [2, 3]
         },
         "gurume": {
             "num": 1,
-            "file": ["2.png"]
+            "file": [1]
         },
         "tamasanpo": {
             "num": 0,
             "file": []
         },
         "omiyage": {
-            "num": 0,
-            "file": []
+            "num": 1,
+            "file": [4]
         }
     },
-    "locations": {
-        "tokyo": {
-            "hatiouji":{
-
-            }
-        },
-        "saitama":{}
-    }
+    "locations": [
+        [100, 200],
+        [120, 180],
+        [105, 121],
+        [110, 112]
+    ]
 }
