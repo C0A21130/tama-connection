@@ -40,20 +40,28 @@ async def get_page(tag: str="kankou"):
 
 # マップにピンを表示するための情報を与える関数
 @app.get("/map")
-def get_location(myx:int, myy:int):
+async def get_location(myx:float, myy:float):
     search = "./search.json"
-    dists = []
+
+    display_num: int = 0
+    dists: float = []
+    result: int = []
 
     # 保存されているメタデータから座標の距離を求める
     with open(search, mode="r", encoding="utf-8") as f:
         jn = json.loads(f.read())["locations"]
 
         for i in jn:
-            dx = i[0] - myx
-            dy = i[1] - myy
+            dx: float = i[0] - myx
+            dy: float = i[1] - myy
             dists.append(math.sqrt(dx*dx + dy*dy))
 
-    # dists
+    # 表示数を決める
+    display_num = 5 if (len(dists) > 5) else len(dists)
+    
+    # 距離が短い順に表示数の数だけ抜き出す
+    s = sorted(dists)
+    for i in range(display_num):
+        result.append(dists.index(s[i]))
 
-    # return {"1.png":{"tag":"kankou","location":[100, 120]}}
-    return {"locations": dists}
+    return {"result": result}
