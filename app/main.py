@@ -10,11 +10,10 @@ def hello():
 
 # 投稿したページをタグから検索して表示する
 @app.get("/page")
-def get_page():
+async def get_page(tag: str="kankou"):
     data = "./data.json"
     search ="./search.json"
 
-    tag = "kankou"
     search_result = []
     result = dict()
 
