@@ -3,6 +3,9 @@ import json
 import random
 import math
 
+TEST_DATA_PATH = "./data.json"
+TEST_SEARCH_DATA_PATH ="./search.json"
+
 app = FastAPI()
 
 @app.get("/")
@@ -12,14 +15,12 @@ def hello():
 # 投稿したページをタグから検索して表示する関数
 @app.get("/page")
 async def get_page(tag: str="kankou"):
-    data = "./data.json"
-    search ="./search.json"
 
     search_result = []
     result = dict()
 
     # タグから該当するファイルを検索する
-    with open(search, mode="r", encoding="utf-8") as f:
+    with open(TEST_SEARCH_DATA_PATH, mode="r", encoding="utf-8") as f:
         jn = json.loads(f.read())["tags"]
         num = jn[tag]["num"]
         file = jn[tag]["file"]
@@ -30,7 +31,7 @@ async def get_page(tag: str="kankou"):
             search_result.append(file[rand])
 
     # 該当したファイルのメタデータを辞書に保存する
-    with open(data, mode="r", encoding="utf-8") as f:
+    with open(TEST_DATA_PATH, mode="r", encoding="utf-8") as f:
         d = json.loads(f.read())
         for i in search_result:
             result[str(i)] = d[str(i)]
@@ -41,14 +42,13 @@ async def get_page(tag: str="kankou"):
 # マップにピンを表示するための情報を与える関数
 @app.get("/map")
 async def get_location(myx:float, myy:float):
-    search = "./search.json"
 
     display_num: int = 0
     dists: float = []
     result: int = []
 
     # 保存されているメタデータから座標の距離を求める
-    with open(search, mode="r", encoding="utf-8") as f:
+    with open(TEST_SEARCH_DATA_PATH, mode="r", encoding="utf-8") as f:
         jn = json.loads(f.read())["locations"]
 
         for i in jn:
