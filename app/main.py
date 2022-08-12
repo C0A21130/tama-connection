@@ -41,8 +41,11 @@ async def get_page(tag: str="kankou"):
 
 # 1つの投稿されたファイルのメタデータ情報を表示する関数
 @app.get("/page/{page_id}")
-async def get_one_page(page_id=1):
-    return {"page": page_id}
+async def get_one_page(page_id :str="1"):
+    with open(TEST_DATA_PATH, mode="r", encoding="utf-8") as f:
+        d = json.loads(f.read())
+    result = d[str(page_id)]
+    return result
 
 # マップにピンを表示するための情報を与える関数
 @app.get("/map")
