@@ -39,6 +39,11 @@ async def get_page(tag: str="kankou"):
     # 該当するファイルのメタデータを返す
     return result
 
+# 1つの投稿されたファイルのメタデータ情報を表示する関数
+@app.get("/page/{page_id}")
+async def get_one_page(page_id=1):
+    return {"page": page_id}
+
 # マップにピンを表示するための情報を与える関数
 @app.get("/map")
 async def get_location(myx:float, myy:float):
