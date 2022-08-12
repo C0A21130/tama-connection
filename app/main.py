@@ -1,4 +1,5 @@
 from fastapi import FastAPI
+from pydantic import BaseModel
 import json
 import random
 import math
@@ -65,3 +66,23 @@ async def get_location(myx:float, myy:float):
         result.append(dists.index(s[i]))
 
     return {"result": result}
+
+class Location(BaseModel):
+    x: float
+    y: float
+
+class Other(BaseModel):
+    user: str
+    location_information: Location
+
+# put_page関数の受け取るjsonデータの型
+class Page(BaseModel):
+    title: str
+    tag: str
+    text: str
+    other: Other
+
+# 新しいメタデータを追加するための関数
+@app.post("/page")
+async def put_page(page: Page):
+    return {"page" : page.title}
