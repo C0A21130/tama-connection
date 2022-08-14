@@ -92,8 +92,10 @@ async def put_page(page: Page):
         d = json.loads(f.read())
     
     # 受けとったデータから新しいデータを作成して追加する
-    files_num: int = d["files_num"]
-    d["files_num"] += 1
+    next_files_num: int = d["files_num"]+1
+    d["files_num"] = next_files_num
+    page_x = page.other.location_information.x
+    page_y = page.other.location_information.y
     new_d = {
         "title": page.title,
         "tag": page.tag,
@@ -101,28 +103,29 @@ async def put_page(page: Page):
         "other": {
             "user": page.other.user,
             "location_information": {
-                "x": page.other.location_information.x,
-                "y": page.other.location_information.y
+                "x": page_x,
+                "y": page_y
             }
         }
     }
-    d[str(files_num+1)] = new_d
+    d[str(next_files_num)] = new_d
 
     # 新しく作成したデータをテストデータに書き込む
     with open(TEST_DATA_PATH, "w") as f:
         json.dump(d, f, indent=2)
 
+    search_d: dict = dict()
     # テストの検索データから元のデータを読み取る
     with open(TEST_SEARCH_DATA_PATH, "r") as f:
-        sed = json.loads(f.read())
+        search_d = json.loads(f.read())
     
     # テストの検索データに受け取ったデータを追加する
-    sed["tags"][page.tag]["num"] += 1
-    sed["tags"][page.tag]["file"].append(int(files_num+1))
-    sed["locations"].append([page.other.location_information.x,page.other.location_information.y])
+    search_d["tags"][page.tag]["num"] += 1
+    search_d["tags"][page.tag]["file"].append(int(next_files_num))
+    search_d["locations"].append([page_x, page_y])
 
     # 受け取ったデータでテストの検索データを書き込む
     with open(TEST_SEARCH_DATA_PATH, "w") as f:
-        json.dump(sed, f, indent=2)
+        json.dump(search_d, f, indent=2)
 
     return new_d
