@@ -1,28 +1,45 @@
 {
-    "tags": {
-        "kankou": {
-            "num" : 2,
-            "file": ["1.png", "2.png"]
-        },
-        "gurume": {
-            "num": 1,
-            "file": ["2.png"]
-        },
-        "tamasanpo": {
-            "num": 0,
-            "file": []
-        },
-        "omiyage": {
-            "num": 0,
-            "file": []
-        }
+  "tags": {
+    "kankou": {
+      "num": 2,
+      "file": [
+        2,
+        3
+      ]
     },
-    "locations": {
-        "tokyo": {
-            "hatiouji":{
-
-            }
-        },
-        "saitama":{}
+    "gurume": {
+      "num": 1,
+      "file": [
+        1
+      ]
+    },
+    "tamasanpo": {
+      "num": 0,
+      "file": []
+    },
+    "omiyage": {
+      "num": 1,
+      "file": [
+        4
+      ]
     }
+  },
+  "locations": [
+    [
+      100,
+      200
+    ],
+    [
+      120,
+      180
+    ],
+    [
+      105,
+      121
+    ],
+    [
+      110,
+      112
+    ]
+  ]
 }
