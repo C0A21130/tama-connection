@@ -85,4 +85,44 @@ class Page(BaseModel):
 # 新しいメタデータを追加するための関数
 @app.post("/page")
 async def put_page(page: Page):
-    return {"page" : page.title}
+    d: dict = dict()
+
+    # テストデータから元のデータを読み取る
+    with open(file=TEST_DATA_PATH, mode="r", encoding="utf-8") as f:
+        d = json.loads(f.read())
+    
+    # 受けとったデータから新しいデータを作成して追加する
+    files_num: int = d["files_num"]
+    d["files_num"] += 1
+    new_d = {
+        "title": page.title,
+        "tag": page.tag,
+        "text": page.title,
+        "other": {
+            "user": page.other.user,
+            "location_information": {
+                "x": page.other.location_information.x,
+                "y": page.other.location_information.y
+            }
+        }
+    }
+    d[str(files_num+1)] = new_d
+
+    # 新しく作成したデータをテストデータに書き込む
+    with open(TEST_DATA_PATH, "w") as f:
+        json.dump(d, f, indent=2)
+
+    # テストの検索データから元のデータを読み取る
+    with open(TEST_SEARCH_DATA_PATH, "r") as f:
+        sed = json.loads(f.read())
+    
+    # テストの検索データに受け取ったデータを追加する
+    sed["tags"][page.tag]["num"] += 1
+    sed["tags"][page.tag]["file"].append(int(files_num+1))
+    sed["locations"].append([page.other.location_information.x,page.other.location_information.y])
+
+    # 受け取ったデータでテストの検索データを書き込む
+    with open(TEST_SEARCH_DATA_PATH, "w") as f:
+        json.dump(sed, f, indent=2)
+
+    return new_d

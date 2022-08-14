@@ -1,51 +1,51 @@
 {
-    "1": {
-        "title": "hoge",
-        "tag": "gurume",
-        "text": "hoge,hoge,hoge",
-        "other": {
-            "user": "test_user",
-            "location_information": {
-                "x": 100,
-                "y": 200
-            }
-        }
-    },
-    "2": {
-        "title": "test",
-        "tag": "kankou",
-        "text": "test,test,test",
-        "other": {
-            "user": "test_user",
-            "location_information": {
-                "x": 120,
-                "y": 180
-            } 
-        }
-    },
-    "3": {
-        "title": "hoge3",
-        "tag": "kankou",
-        "text": "hoge,hoge,hoge",
-        "other": {
-            "user": "test_user",
-            "location_information": {
-                "x": 105,
-                "y": 121
-            }
-        }
-    },
-    "4": {
-        "title": "hoge4",
-        "tag": "omiyage",
-        "text": "hoge,hoge,hoge",
-        "other": {
-            "user": "test_user",
-            "location_information": {
-                "x": 110,
-                "y": 112
-            }
-        }
+  "files_num": 5,
+  "1": {
+    "title": "hoge",
+    "tag": "gurume",
+    "text": "hoge,hoge,hoge",
+    "other": {
+      "user": "test_user",
+      "location_information": {
+        "x": 100,
+        "y": 200
+      }
     }
-    
+  },
+  "2": {
+    "title": "test",
+    "tag": "kankou",
+    "text": "test,test,test",
+    "other": {
+      "user": "test_user",
+      "location_information": {
+        "x": 120,
+        "y": 180
+      }
+    }
+  },
+  "3": {
+    "title": "hoge3",
+    "tag": "kankou",
+    "text": "hoge,hoge,hoge",
+    "other": {
+      "user": "test_user",
+      "location_information": {
+        "x": 105,
+        "y": 121
+      }
+    }
+  },
+  "4": {
+    "title": "hoge4",
+    "tag": "omiyage",
+    "text": "hoge,hoge,hoge",
+    "other": {
+      "user": "test_user",
+      "location_information": {
+        "x": 110,
+        "y": 112
+      }
+    }
+  }
 }
