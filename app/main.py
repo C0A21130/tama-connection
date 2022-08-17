@@ -1,7 +1,6 @@
-import collections
-from http import client
 from fastapi import FastAPI
 from pydantic import BaseModel
+from typing import List
 from pymongo import MongoClient
 import json
 import random
@@ -12,7 +11,10 @@ TEST_SEARCH_DATA_PATH ="./search.json"
 
 client = MongoClient(host="mongo", port=27017, username="root", password="password")
 db = client["test_db"]
-collection = db["test_collection"]
+
+search_tags = db["search_tags"]
+search_locations = db["search_locations"]
+file_data = db["file_data"]
 
 app = FastAPI()
 
@@ -22,30 +24,28 @@ def hello():
 
 # 投稿したページをタグから検索して表示する関数
 @app.get("/page")
-async def get_page(tag: str="kankou"):
+def get_page(tag: str="kankou"):
 
-    search_result = []
-    result = dict()
-
+    # 検索した結果を保存するリスト
+    search_result: List[int] = []
+    
     # タグから該当するファイルを検索する
-    with open(TEST_SEARCH_DATA_PATH, mode="r", encoding="utf-8") as f:
-        jn = json.loads(f.read())["tags"]
-        num = jn[tag]["num"]
-        file = jn[tag]["file"]
+    find = search_tags.find_one({"tag" : tag}, {"_id": False})
 
-        # 10個ファイルを検索する
-        for i in range(10):
-            rand = random.randint(0,num-1)
-            search_result.append(file[rand])
+    # 検索した結果からファイル数とファイルを取り出す
+    num: int = find["num"]
+    files: List[int] = find["files"]
 
-    # 該当したファイルのメタデータを辞書に保存する
-    with open(TEST_DATA_PATH, mode="r", encoding="utf-8") as f:
-        d = json.loads(f.read())
-        for i in search_result:
-            result[str(i)] = d[str(i)]
+    # 10個ランダムで取り出す
+    if num!=0:
+        for i in range(num):
+            rand: int = random.randint(0, num-1)
+            search_result.append(files[rand])
+    else:
+        search_result = []
 
     # 該当するファイルのメタデータを返す
-    return result
+    return {"num" : num, "files" : search_result}
 
 # 1つの投稿されたファイルのメタデータ情報を表示する関数
 @app.get("/page/{page_id}")
