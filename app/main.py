@@ -1,11 +1,18 @@
+import collections
+from http import client
 from fastapi import FastAPI
 from pydantic import BaseModel
+from pymongo import MongoClient
 import json
 import random
 import math
 
 TEST_DATA_PATH = "./data.json"
 TEST_SEARCH_DATA_PATH ="./search.json"
+
+client = MongoClient(host="mongo", port=27017, username="root", password="password")
+db = client["test_db"]
+collection = db["test_collection"]
 
 app = FastAPI()
 
