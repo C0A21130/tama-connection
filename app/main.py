@@ -58,27 +58,28 @@ def get_one_page(page_id :int=1):
 async def get_location(myx:float, myy:float):
 
     display_num: int = 0
-    dists: float = []
-    result: int = []
+    dists: List[float] = []
+    search_result: List[int] = []
 
     # 保存されているメタデータから座標の距離を求める
-    with open(TEST_SEARCH_DATA_PATH, mode="r", encoding="utf-8") as f:
-        jn = json.loads(f.read())["locations"]
+    find: dict = search_locations.find_one({}, {"_id" : False})
 
-        for i in jn:
-            dx: float = i[0] - myx
-            dy: float = i[1] - myy
-            dists.append(math.sqrt(dx*dx + dy*dy))
+    # 自身の座標と写真の座標との距離を求める
+    for f in find["locations"]:
+        dx: float = f[0] - myx
+        dy: float = f[1] - myy
+        dists.append(math.sqrt(dx*dx + dy*dy))
 
     # 表示数を決める
     display_num = 5 if (len(dists) > 5) else len(dists)
     
     # 距離が短い順に表示数の数だけ抜き出す
-    s = sorted(dists)
+    sorted_dists = sorted(dists)
     for i in range(display_num):
-        result.append(dists.index(s[i]))
+        index = dists.index(sorted_dists[i])+1
+        search_result.append(index)
 
-    return {"result": result}
+    return {"result": search_result}
 
 class Location(BaseModel):
     x: float
