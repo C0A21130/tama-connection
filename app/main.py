@@ -2,7 +2,6 @@ from fastapi import FastAPI
 from pydantic import BaseModel
 from typing import List
 from pymongo import MongoClient
-import json
 import random
 import math
 
@@ -29,12 +28,12 @@ def get_page(tag: str="kankou"):
     # 検索した結果を保存するリスト
     search_result: List[int] = []
     
-    # タグから該当するファイルを検索する
+    # 該当するタグのファイル名をDBから検索する
     find = search_tags.find_one({"tag" : tag}, {"_id": False})
 
     # 検索した結果からファイル数とファイルを取り出す
-    num: int = find["num"]
     files: List[int] = find["files"]
+    num: int = len(files)
 
     # 10個ランダムで取り出す
     if num!=0:
@@ -87,7 +86,7 @@ class Location(BaseModel):
 
 class Other(BaseModel):
     user: str
-    location_information: Location
+    location: Location
 
 # put_page関数の受け取るjsonデータの型
 class Page(BaseModel):
@@ -99,18 +98,19 @@ class Page(BaseModel):
 # 新しいメタデータを追加するための関数
 @app.post("/page")
 async def put_page(page: Page):
-    d: dict = dict()
 
-    # テストデータから元のデータを読み取る
-    with open(file=TEST_DATA_PATH, mode="r", encoding="utf-8") as f:
-        d = json.loads(f.read())
+    # DBからデータ数を読み取る
+    find: dict = file_data.find_one({"file_name": 0}, {"_id" : False})
     
-    # 受けとったデータから新しいデータを作成して追加する
-    next_files_num: int = d["files_num"]+1
-    d["files_num"] = next_files_num
-    page_x = page.other.location_information.x
-    page_y = page.other.location_information.y
-    new_d = {
+    # 新しいページ番号の作成
+    next_files_num: int = find["files_num"]+1
+    
+    page_x:float = page.other.location.x
+    page_y:float = page.other.location.y
+
+    # 受けとったjsonデータから新しいページを作成する
+    new_page = {
+        "file_name": next_files_num,
         "title": page.title,
         "tag": page.tag,
         "text": page.title,
@@ -119,27 +119,19 @@ async def put_page(page: Page):
             "location_information": {
                 "x": page_x,
                 "y": page_y
-            }
+            },
+            "good": 0
         }
     }
-    d[str(next_files_num)] = new_d
 
-    # 新しく作成したデータをテストデータに書き込む
-    with open(TEST_DATA_PATH, "w") as f:
-        json.dump(d, f, indent=2)
+    # 新しく作成したデータをデータに書き込む
+    file_data.insert_one(new_page)
+    file_data.update_one({"file_name": 0}, {"$set":{"files_num": next_files_num}})
 
-    search_d: dict = dict()
-    # テストの検索データから元のデータを読み取る
-    with open(TEST_SEARCH_DATA_PATH, "r") as f:
-        search_d = json.loads(f.read())
-    
-    # テストの検索データに受け取ったデータを追加する
-    search_d["tags"][page.tag]["num"] += 1
-    search_d["tags"][page.tag]["file"].append(int(next_files_num))
-    search_d["locations"].append([page_x, page_y])
+    # タグ検索用DBに要素の追加
+    search_tags.update_one({"tag":page.tag}, {"$push": {"files":next_files_num}})
 
-    # 受け取ったデータでテストの検索データを書き込む
-    with open(TEST_SEARCH_DATA_PATH, "w") as f:
-        json.dump(search_d, f, indent=2)
+    # 位置情報検索用DBに要素の追加
+    search_locations.update_one({}, {"$push":{"locations":[page_x,page_y]}})
 
-    return new_d
+    return new_page
