@@ -1,19 +1,15 @@
 from fastapi import FastAPI
-from pydantic import BaseModel
 from typing import List
-from pymongo import MongoClient
 import random
 import math
+from models.page import Page
+from database import DataBase
 
-TEST_DATA_PATH = "./data.json"
-TEST_SEARCH_DATA_PATH ="./search.json"
-
-client = MongoClient(host="mongo", port=27017, username="root", password="password")
-db = client["test_db"]
-
-search_tags = db["search_tags"]
-search_locations = db["search_locations"]
-file_data = db["file_data"]
+# DBの接続
+db = DataBase()
+search_tags = db.search_tags()
+search_locations = db.search_locations()
+file_data = db.file_data()
 
 app = FastAPI()
 
@@ -43,7 +39,6 @@ def get_page(tag: str="kankou"):
     else:
         search_result = []
 
-    # 該当するファイルのメタデータを返す
     return {"num" : num, "files" : search_result}
 
 # 1つの投稿されたファイルのメタデータ情報を表示する関数
@@ -56,7 +51,7 @@ def get_one_page(page_id :int=1):
 @app.get("/map")
 async def get_location(myx:float, myy:float):
 
-    display_num: int = 0
+    # 配列の初期化
     dists: List[float] = []
     search_result: List[int] = []
 
@@ -70,7 +65,7 @@ async def get_location(myx:float, myy:float):
         dists.append(math.sqrt(dx*dx + dy*dy))
 
     # 表示数を決める
-    display_num = 5 if (len(dists) > 5) else len(dists)
+    display_num:int = 5 if (len(dists) > 5) else len(dists)
     
     # 距離が短い順に表示数の数だけ抜き出す
     sorted_dists = sorted(dists)
@@ -79,21 +74,6 @@ async def get_location(myx:float, myy:float):
         search_result.append(index)
 
     return {"result": search_result}
-
-class Location(BaseModel):
-    x: float
-    y: float
-
-class Other(BaseModel):
-    user: str
-    location: Location
-
-# put_page関数の受け取るjsonデータの型
-class Page(BaseModel):
-    title: str
-    tag: str
-    text: str
-    other: Other
 
 # 新しいメタデータを追加するための関数
 @app.post("/page")
@@ -124,7 +104,7 @@ async def put_page(page: Page):
         }
     }
 
-    # 新しく作成したデータをデータに書き込む
+    # 新しく作成したデータをDBに要素の追加
     file_data.insert_one(new_page)
     file_data.update_one({"file_name": 0}, {"$set":{"files_num": next_files_num}})
 
