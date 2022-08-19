@@ -7,12 +7,13 @@ from database import DataBase
 
 # DBの接続
 db = DataBase()
-search_tags = db.search_tags()
-search_locations = db.search_locations()
-file_data = db.file_data()
+search_tags = db.get_collection(collection_name="search_tags")
+search_locations = db.get_collection(collection_name="search_locations")
+file_data = db.get_collection(collection_name="file_data")
 
 app = FastAPI()
 
+# テストページを表示する関数
 @app.get("/")
 def hello():
     return {"hello" : "Hello World"}
