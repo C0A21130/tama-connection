@@ -22,25 +22,38 @@ def hello():
 @app.get("/page")
 def get_page(tag: str="kankou"):
 
-    # 検索した結果を保存するリスト
-    search_result: List[int] = []
+    # 最終的な結果を保存するリスト
+    search_result = []
     
-    # 該当するタグのファイル名をDBから検索する
+    # 該当するタグのページをDBから検索する
     find = search_tags.find_one({"tag" : tag}, {"_id": False})
 
-    # 検索した結果からファイル数とファイルを取り出す
-    files: List[int] = find["files"]
-    num: int = len(files)
+    # 検索したタグのページとページ数を取り出す
+    pages: List[int] = find["files"]
+    num: int = len(pages)
 
-    # 10個ランダムで取り出す
-    if num!=0:
-        for i in range(num):
-            rand: int = random.randint(0, num-1)
-            search_result.append(files[rand])
+    # ページをランダムに4つ取り出す
+    if num==0:
+        pages = []
     else:
-        search_result = []
+        # ページをランダムに入れ替える
+        for i in range(num):
+            rand: int = random.randint(i, num-1)
+            temp = pages[i]
+            pages[i] = pages[rand]
+            pages[rand] = temp
+        # 4つ取り出す
+        for i in range(num, 4, -1):
+            pages.pop()
+    
+    # ファイルとともに保存されているタイトルとテキストをDBから検索する
+    for page in pages:
+        page_data = get_one_page(page)
+        title: str = page_data["title"]
+        text: str = page_data["text"]
+        search_result.append({"image":"", "title":title, "text":text})
 
-    return {"num" : num, "files" : search_result}
+    return {"num":num, "page":pages, "files":search_result}
 
 # 1つの投稿されたファイルのメタデータ情報を表示する関数
 @app.get("/page/{page_id}")
