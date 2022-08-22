@@ -116,7 +116,7 @@ async def put_page(page: Page):
         "file_name": next_files_num,
         "title": page.title,
         "tag": page.tag,
-        "text": page.title,
+        "text": page.text,
         "other": {
             "user": page.other.user,
             "location_information": {

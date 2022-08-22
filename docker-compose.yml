@@ -2,6 +2,12 @@ version: '3.1'
 services:
   web: 
     build: .
+    environment:
+      DB_URL: "mongodb+srv://koukaton:5jt8y9nas@cluster0.091dd.mongodb.net/TamaConnection?retryWrites=true&w=majority"
+      DB_HOST: "mongo"
+      DB_PORT: 27017
+      DB_USERNAME: "root"
+      DB_PASSWORD: "password"
     ports:
       - "5000:5000"
     volumes:
