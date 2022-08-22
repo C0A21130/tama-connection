@@ -2,6 +2,7 @@ from fastapi import FastAPI
 from typing import List
 import random
 import math
+import json
 from models.page import Page
 from database import DataBase
 
@@ -49,16 +50,24 @@ def get_page(tag: str="kankou"):
     # ファイルとともに保存されているタイトルとテキストをDBから検索する
     for page in pages:
         page_data = get_one_page(page)
+        image: str = page_data["image"]
         title: str = page_data["title"]
         text: str = page_data["text"]
-        search_result.append({"image":"", "title":title, "text":text})
+        search_result.append({"image":image, "title":title, "text":text})
 
     return {"num":num, "page":pages, "files":search_result}
 
 # 1つの投稿されたファイルのメタデータ情報を表示する関数
 @app.get("/page/{page_id}")
 def get_one_page(page_id :int=1):
+    # 指定したページ番号から情報を取得する
     search_result: dict = file_data.find_one({"file_name" : page_id}, {"_id" : False})
+
+    # 写真を取り出す
+    with open("./pictures.json", mode="r") as f:
+        j = json.load(f)
+    search_result["image"] = j[str(page_id)]
+
     return search_result
 
 # マップにピンを表示するための情報を与える関数
