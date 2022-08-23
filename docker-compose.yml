@@ -1,9 +1,39 @@
-version: '3'
+version: '3.1'
 services:
   web: 
     build: .
+    environment:
+      DB_URL: "mongodb+srv://koukaton:5jt8y9nas@cluster0.091dd.mongodb.net/TamaConnection?retryWrites=true&w=majority"
+      DB_HOST: "mongo"
+      DB_PORT: 27017
+      DB_USERNAME: "root"
+      DB_PASSWORD: "password"
     ports:
       - "5000:5000"
     volumes:
       - "./app:/home/app"
     tty: true
+  mongo:
+    image: mongo
+    container_name: mongo_db
+    restart: always
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: password
+    ports:
+      - "27017:27017"
+    volumes:
+      - ./mongodb_data:/data/db
+      - ./config:/data/configdb
+  mongo-express:
+    image: mongo-express
+    container_name: mongo_express
+    restart: always
+    ports:
+      - "8081:8081"
+    environment:
+      ME_CONFIG_MONGODB_ADMINUSERNAME: root
+      ME_CONFIG_MONGODB_ADMINPASSWORD: password
+      ME_CONFIG_MONGODB_SERVER: mongo
+    depends_on:
+      - mongo

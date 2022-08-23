@@ -1,139 +1,140 @@
 from fastapi import FastAPI
-from pydantic import BaseModel
-import json
+from typing import List
 import random
 import math
+import json
+from models.page import Page
+from database import DataBase
 
-TEST_DATA_PATH = "./data.json"
-TEST_SEARCH_DATA_PATH ="./search.json"
+# DBの接続
+db = DataBase()
+search_tags = db.get_collection(collection_name="search_tags")
+search_locations = db.get_collection(collection_name="search_locations")
+file_data = db.get_collection(collection_name="file_data")
 
 app = FastAPI()
 
+# テストページを表示する関数
 @app.get("/")
 def hello():
     return {"hello" : "Hello World"}
 
 # 投稿したページをタグから検索して表示する関数
 @app.get("/page")
-async def get_page(tag: str="kankou"):
+def get_page(tag: str="kankou"):
 
+    # 最終的な結果を保存するリスト
     search_result = []
-    result = dict()
+    
+    # 該当するタグのページをDBから検索する
+    find = search_tags.find_one({"tag" : tag}, {"_id": False})
 
-    # タグから該当するファイルを検索する
-    with open(TEST_SEARCH_DATA_PATH, mode="r", encoding="utf-8") as f:
-        jn = json.loads(f.read())["tags"]
-        num = jn[tag]["num"]
-        file = jn[tag]["file"]
+    # 検索したタグのページとページ数を取り出す
+    pages: List[int] = find["files"]
+    num: int = len(pages)
 
-        # 10個ファイルを検索する
-        for i in range(10):
-            rand = random.randint(0,num-1)
-            search_result.append(file[rand])
+    # ページをランダムに4つ取り出す
+    if num==0:
+        pages = []
+    else:
+        # ページをランダムに入れ替える
+        for i in range(num):
+            rand: int = random.randint(i, num-1)
+            temp = pages[i]
+            pages[i] = pages[rand]
+            pages[rand] = temp
+        # 4つ取り出す
+        for i in range(num, 4, -1):
+            pages.pop()
+    
+    # ファイルとともに保存されているタイトルとテキストをDBから検索する
+    for page in pages:
+        page_data = get_one_page(page)
+        image: str = page_data["image"]
+        title: str = page_data["title"]
+        text: str = page_data["text"]
+        search_result.append({"image":image, "title":title, "text":text})
 
-    # 該当したファイルのメタデータを辞書に保存する
-    with open(TEST_DATA_PATH, mode="r", encoding="utf-8") as f:
-        d = json.loads(f.read())
-        for i in search_result:
-            result[str(i)] = d[str(i)]
-
-    # 該当するファイルのメタデータを返す
-    return result
+    return {"num":num, "page":pages, "files":search_result}
 
 # 1つの投稿されたファイルのメタデータ情報を表示する関数
 @app.get("/page/{page_id}")
-async def get_one_page(page_id :str="1"):
-    with open(TEST_DATA_PATH, mode="r", encoding="utf-8") as f:
-        d = json.loads(f.read())
-    result = d[str(page_id)]
-    return result
+def get_one_page(page_id :int=1):
+    # 指定したページ番号から情報を取得する
+    search_result: dict = file_data.find_one({"file_name" : page_id}, {"_id" : False})
+
+    # 写真を取り出す
+    with open("./pictures.json", mode="r") as f:
+        j = json.load(f)
+    search_result["image"] = j[str(page_id)]
+
+    return search_result
 
 # マップにピンを表示するための情報を与える関数
 @app.get("/map")
 async def get_location(myx:float, myy:float):
 
-    display_num: int = 0
-    dists: float = []
-    result: int = []
+    # 配列の初期化
+    dists: List[float] = []
+    search_result: List[int] = []
 
     # 保存されているメタデータから座標の距離を求める
-    with open(TEST_SEARCH_DATA_PATH, mode="r", encoding="utf-8") as f:
-        jn = json.loads(f.read())["locations"]
+    find: dict = search_locations.find_one({}, {"_id" : False})
 
-        for i in jn:
-            dx: float = i[0] - myx
-            dy: float = i[1] - myy
-            dists.append(math.sqrt(dx*dx + dy*dy))
+    # 自身の座標と写真の座標との距離を求める
+    for f in find["locations"]:
+        dx: float = f[0] - myx
+        dy: float = f[1] - myy
+        dists.append(math.sqrt(dx*dx + dy*dy))
 
     # 表示数を決める
-    display_num = 5 if (len(dists) > 5) else len(dists)
+    display_num:int = 5 if (len(dists) > 5) else len(dists)
     
     # 距離が短い順に表示数の数だけ抜き出す
-    s = sorted(dists)
+    sorted_dists = sorted(dists)
     for i in range(display_num):
-        result.append(dists.index(s[i]))
+        index = dists.index(sorted_dists[i])+1
+        search_result.append(index)
 
-    return {"result": result}
-
-class Location(BaseModel):
-    x: float
-    y: float
-
-class Other(BaseModel):
-    user: str
-    location_information: Location
-
-# put_page関数の受け取るjsonデータの型
-class Page(BaseModel):
-    title: str
-    tag: str
-    text: str
-    other: Other
+    return {"result": search_result}
 
 # 新しいメタデータを追加するための関数
 @app.post("/page")
 async def put_page(page: Page):
-    d: dict = dict()
 
-    # テストデータから元のデータを読み取る
-    with open(file=TEST_DATA_PATH, mode="r", encoding="utf-8") as f:
-        d = json.loads(f.read())
+    # DBからデータ数を読み取る
+    find: dict = file_data.find_one({"file_name": 0}, {"_id" : False})
     
-    # 受けとったデータから新しいデータを作成して追加する
-    next_files_num: int = d["files_num"]+1
-    d["files_num"] = next_files_num
-    page_x = page.other.location_information.x
-    page_y = page.other.location_information.y
-    new_d = {
+    # 新しいページ番号の作成
+    next_files_num: int = find["files_num"]+1
+    
+    page_x:float = page.other.location.x
+    page_y:float = page.other.location.y
+
+    # 受けとったjsonデータから新しいページを作成する
+    new_page = {
+        "file_name": next_files_num,
         "title": page.title,
         "tag": page.tag,
-        "text": page.title,
+        "text": page.text,
         "other": {
             "user": page.other.user,
             "location_information": {
                 "x": page_x,
                 "y": page_y
-            }
+            },
+            "good": 0
         }
     }
-    d[str(next_files_num)] = new_d
 
-    # 新しく作成したデータをテストデータに書き込む
-    with open(TEST_DATA_PATH, "w") as f:
-        json.dump(d, f, indent=2)
+    # 新しく作成したデータをDBに要素の追加
+    file_data.insert_one(new_page)
+    file_data.update_one({"file_name": 0}, {"$set":{"files_num": next_files_num}})
 
-    search_d: dict = dict()
-    # テストの検索データから元のデータを読み取る
-    with open(TEST_SEARCH_DATA_PATH, "r") as f:
-        search_d = json.loads(f.read())
-    
-    # テストの検索データに受け取ったデータを追加する
-    search_d["tags"][page.tag]["num"] += 1
-    search_d["tags"][page.tag]["file"].append(int(next_files_num))
-    search_d["locations"].append([page_x, page_y])
+    # タグ検索用DBに要素の追加
+    search_tags.update_one({"tag":page.tag}, {"$push": {"files":next_files_num}})
 
-    # 受け取ったデータでテストの検索データを書き込む
-    with open(TEST_SEARCH_DATA_PATH, "w") as f:
-        json.dump(search_d, f, indent=2)
+    # 位置情報検索用DBに要素の追加
+    search_locations.update_one({}, {"$push":{"locations":[page_x,page_y]}})
 
-    return new_d
+    return new_page
