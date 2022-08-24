@@ -53,9 +53,9 @@ def get_page(tag: str="kankou"):
         image: str = page_data["image"]
         title: str = page_data["title"]
         text: str = page_data["text"]
-        search_result.append({"image":image, "title":title, "text":text})
+        search_result.append({"page":page, "image":image, "title":title, "text":text})
 
-    return {"num":num, "page":pages, "files":search_result}
+    return {"result" : search_result}
 
 # 1つの投稿されたファイルのメタデータ情報を表示する関数
 @app.get("/page/{page_id}")
