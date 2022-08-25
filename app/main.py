@@ -1,4 +1,5 @@
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 from typing import List
 import random
 import math
@@ -13,6 +14,20 @@ search_locations = db.get_collection(collection_name="search_locations")
 file_data = db.get_collection(collection_name="file_data")
 
 app = FastAPI()
+
+# CORSの設定
+origins = [
+    "http://localhost:3000",
+    "https://lemon-bush-0663dd310.1.azurestaticapps.net/"
+]
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"]
+)
 
 # テストページを表示する関数
 @app.get("/")
