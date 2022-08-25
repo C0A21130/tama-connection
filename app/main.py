@@ -18,7 +18,7 @@ app = FastAPI()
 # CORSの設定
 origins = [
     "http://localhost:3000",
-    "https://lemon-bush-0663dd310.1.azurestaticapps.net/"
+    "https://lemon-bush-0663dd310.1.azurestaticapps.net"
 ]
 
 app.add_middleware(
