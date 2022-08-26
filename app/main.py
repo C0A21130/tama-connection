@@ -36,41 +36,18 @@ def hello():
 
 # 投稿したページをタグから検索して表示する関数
 @app.get("/page")
-def get_page(tag: str="kankou"):
+def get_page():
 
-    # 最終的な結果を保存するリスト
-    search_result = []
-    
-    # 該当するタグのページをDBから検索する
-    find = search_tags.find_one({"tag" : tag}, {"_id": False})
+    tags  = ["kankou", "gurume", "tamasanpo" ,"omiyage"]
+    page_names:dict = {"kankou": [], "gurume": [], "tamasanpo":[], "omiyage":[]}
 
-    # 検索したタグのページとページ数を取り出す
-    pages: List[int] = find["files"]
-    num: int = len(pages)
+    # 該当するタグのページの名前をDBから検索する
+    for tag in tags:
+        finds = file_data.find({"tag" : tag}, {"_id": False})
+        for find in list(finds):
+            page_names[tag].append(find["file_name"])
 
-    # ページをランダムに4つ取り出す
-    if num==0:
-        pages = []
-    else:
-        # ページをランダムに入れ替える
-        for i in range(num):
-            rand: int = random.randint(i, num-1)
-            temp = pages[i]
-            pages[i] = pages[rand]
-            pages[rand] = temp
-        # 4つ取り出す
-        for i in range(num, 4, -1):
-            pages.pop()
-    
-    # ファイルとともに保存されているタイトルとテキストをDBから検索する
-    for page in pages:
-        page_data = get_one_page(page)
-        image: str = page_data["image"]
-        title: str = page_data["title"]
-        text: str = page_data["text"]
-        search_result.append({"page":page, "image":image, "title":title, "text":text})
-
-    return {"result" : search_result}
+    return page_names
 
 # 1つの投稿されたファイルのメタデータ情報を表示する関数
 @app.get("/page/{page_id}")
