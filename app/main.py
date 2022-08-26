@@ -38,6 +38,8 @@ def hello():
 @app.get("/page")
 def get_page():
 
+    search_result = {"kankou": [], "gurume": [], "tamasanpo":[], "omiyage":[]}
+
     tags  = ["kankou", "gurume", "tamasanpo" ,"omiyage"]
     page_names:dict = {"kankou": [], "gurume": [], "tamasanpo":[], "omiyage":[]}
 
@@ -47,7 +49,13 @@ def get_page():
         for find in list(finds):
             page_names[tag].append(find["file_name"])
 
-    return page_names
+    # 検索されたページの名前から該当するページのデータをDBから取得する
+    for tag in page_names:
+        for page_name in page_names[tag]:
+            page_data =  get_one_page(page_id=page_name)
+            search_result[tag].append(page_data)
+
+    return search_result
 
 # 1つの投稿されたファイルのメタデータ情報を表示する関数
 @app.get("/page/{page_id}")
