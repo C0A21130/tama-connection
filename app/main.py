@@ -100,13 +100,15 @@ async def get_location(myx:float, myy:float):
 
 # 新しいメタデータを追加するための関数
 @app.post("/page")
-async def put_page(page: Page):
+def post_page(page: Page):
+
+    print("hello")
 
     # DBからデータ数を読み取る
-    find: dict = file_data.find_one({"file_name": 0}, {"_id" : False})
+    finds_num:int = file_data.count_documents({})
     
     # 新しいページ番号の作成
-    next_files_num: int = find["files_num"]+1
+    next_files_num: int = finds_num + 1
     
     page_x:float = page.other.location.x
     page_y:float = page.other.location.y
@@ -119,7 +121,7 @@ async def put_page(page: Page):
         "text": page.text,
         "other": {
             "user": page.other.user,
-            "location_information": {
+            "location": {
                 "x": page_x,
                 "y": page_y
             },
@@ -127,14 +129,7 @@ async def put_page(page: Page):
         }
     }
 
-    # 新しく作成したデータをDBに要素の追加
+    # 新しく作成したデータをDBに追加
     file_data.insert_one(new_page)
-    file_data.update_one({"file_name": 0}, {"$set":{"files_num": next_files_num}})
-
-    # タグ検索用DBに要素の追加
-    search_tags.update_one({"tag":page.tag}, {"$push": {"files":next_files_num}})
-
-    # 位置情報検索用DBに要素の追加
-    search_locations.update_one({}, {"$push":{"locations":[page_x,page_y]}})
 
     return new_page
