@@ -102,8 +102,6 @@ async def get_location(myx:float, myy:float):
 @app.post("/page")
 def post_page(page: Page):
 
-    print("hello")
-
     # DBからデータ数を読み取る
     finds_num:int = file_data.count_documents({})
     
