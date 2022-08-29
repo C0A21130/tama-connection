@@ -128,6 +128,6 @@ def post_page(page: Page):
     }
 
     # 新しく作成したデータをDBに追加
-    file_data.insert_one(new_page)
+    result = file_data.insert_one(new_page)
 
-    return new_page
+    return result
