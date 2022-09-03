@@ -124,7 +124,8 @@ def post_page(page: Page):
                 "y": page_y
             },
             "good": 0
-        }
+        },
+        "image" : page.image
     }
 
     # 新しく作成したデータをDBに追加

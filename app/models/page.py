@@ -1,3 +1,4 @@
+from email.mime import image
 from pydantic import BaseModel
 
 class Location(BaseModel):
@@ -14,3 +15,4 @@ class Page(BaseModel):
     tag: str
     text: str
     other: Other
+    image: str
