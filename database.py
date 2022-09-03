@@ -11,8 +11,8 @@ DB_PASSWORD = os.environ["DB_PASSWORD"]
 # DBに接続
 class DataBase:
     def __init__(self):
-        # self.db = MongoClient(DB_URL)
-        self.db = MongoClient(host=DB_HOST, port=int(DB_PORT), username=DB_USERNAME, password=DB_PASSWORD)
+        self.db = MongoClient(DB_URL)
+        # self.db = MongoClient(host=DB_HOST, port=int(DB_PORT), username=DB_USERNAME, password=DB_PASSWORD)
         self.client = self.db["TamaConnection"]
 
     def get_collection(self, collection_name:str):
