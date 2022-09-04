@@ -1,15 +1,14 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from typing import List
-import random
 import math
 import json
 from models.page import Page
 from database import DataBase
+from user import post_user
 
 # DBの接続
 db = DataBase()
-search_tags = db.get_collection(collection_name="search_tags")
 search_locations = db.get_collection(collection_name="search_locations")
 file_data = db.get_collection(collection_name="file_data")
 
@@ -132,3 +131,7 @@ def post_page(page: Page):
     result = file_data.insert_one(new_page)
 
     return result
+
+@app.post("/user")
+def user():
+    return post_user()
