@@ -1,32 +1,39 @@
 from database import DataBase
 
-# DBの接続
-db = DataBase()
-user_data = db.get_collection(collection_name="user_data")
+# ユーザー情報のクラス
+class User:
 
-# DBにユーザーを追加する関数
-def post_user(user):
-    num = user_data.count_documents({})
+    def __init__(self):
+        # ユーザーDBの接続
+        self.db = DataBase()
+        self.user_data = self.db.get_collection(collection_name="user_data")
 
-    user_doc = {
-        "user_id" : num + 1,
-        "user_name" : user.name,
-        "password" : user.password,
-        "checked" : []
-    }
+    # ユーザーの情報を追加
+    def post_user(self, user):
+        # ユーザー数の確認
+        num = self.user_data.count_documents({})
 
-    user_data.insert_one(user_doc)
+        user_doc = {
+            "user_id" : num + 1,
+            "user_name" : user.name,
+            "password" : user.password,
+            "checked" : []
+        }
 
-    return {"user_id" : num + 1}
+        # DBにユーザーの情報を追加
+        self.user_data.insert_one(user_doc)
 
-# ユーザーの情報を返す関数
-def get_user(user_id):
-    find = user_data.find_one({"user_id": user_id}, {"_id": False})
+        # 作成したユーザーのIDを返す
+        return {"user_id" : num + 1}
 
-    # 返せる情報のみを抜き出して返す
-    user_doc = {
-        "user_name" : find["user_name"],
-        "checked" : find["checked"]
-    }
+    # ユーザーの情報を返す
+    def get_user(self, user_id):
+        find = self.user_data.find_one({"user_id": user_id}, {"_id": False})
 
-    return user_doc
+        # 返せる情報のみを抜き出して返す
+        user_doc = {
+            "user_name" : find["user_name"],
+            "checked" : find["checked"]
+        }
+
+        return user_doc
