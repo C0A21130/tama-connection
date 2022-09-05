@@ -3,7 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from typing import List
 import math
 import json
-from models.page import Page
+import model
 from database import DataBase
 from user import post_user
 
@@ -99,7 +99,7 @@ async def get_location(myx:float, myy:float):
 
 # 新しいメタデータを追加するための関数
 @app.post("/page")
-def post_page(page: Page):
+def post_page(page: model.Page):
 
     # DBからデータ数を読み取る
     finds_num:int = file_data.count_documents({})
@@ -133,5 +133,5 @@ def post_page(page: Page):
     return result
 
 @app.post("/user")
-def user():
-    return post_user()
+def user(user: model.User):
+    return post_user(user)

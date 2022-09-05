@@ -1,4 +1,3 @@
-from email.mime import image
 from pydantic import BaseModel
 
 class Location(BaseModel):
@@ -16,3 +15,8 @@ class Page(BaseModel):
     text: str
     other: Other
     image: str
+
+# post_user関数の受け取るjsonデータの型
+class User(BaseModel):
+    name: str
+    password: str
