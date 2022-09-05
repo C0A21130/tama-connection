@@ -25,8 +25,8 @@ def get_user(user_id):
 
     # 返せる情報のみを抜き出して返す
     user_doc = {
-        "user_name" : find.user_id,
-        "checked" : find.checked
+        "user_name" : find["user_name"],
+        "checked" : find["checked"]
     }
 
     return user_doc

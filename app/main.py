@@ -135,7 +135,7 @@ def post_page(page: model.Page):
 
 # ユーザーを情報を返す
 @app.get("/user/{user_id}")
-def g_user(user_id):
+def g_user(user_id: int = 1):
     return get_user(user_id)
 
 # ユーザーの追加する
