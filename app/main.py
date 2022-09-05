@@ -62,11 +62,6 @@ def get_one_page(page_id :int=1):
     # 指定したページ番号から情報を取得する
     search_result: dict = file_data.find_one({"file_name" : page_id}, {"_id" : False})
 
-    # 写真を取り出す
-    with open("./pictures.json", mode="r") as f:
-        j = json.load(f)
-    search_result["image"] = j[str(page_id)]
-
     return search_result
 
 # マップにピンを表示するための情報を与える関数
