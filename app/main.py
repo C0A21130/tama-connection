@@ -6,6 +6,7 @@ import json
 import model
 from database import DataBase
 from user import post_user
+from user import get_user
 
 # DBの接続
 db = DataBase()
@@ -132,6 +133,12 @@ def post_page(page: model.Page):
 
     return result
 
+# ユーザーを情報を返す
+@app.get("/user/{user_id}")
+def g_user(user_id):
+    return get_user(user_id)
+
+# ユーザーの追加する
 @app.post("/user")
-def user(user: model.User):
+def p_user(user: model.User):
     return post_user(user)
