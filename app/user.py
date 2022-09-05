@@ -16,4 +16,4 @@ def post_user(user):
 
     user_data.insert_one(user_doc)
 
-    return {"test" : "post_user"}
+    return {"user_id" : num + 1}
