@@ -1,8 +1,7 @@
+from gettext import find
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from typing import List
 import math
-import json
 import model
 from database import DataBase
 from user import User
@@ -66,31 +65,34 @@ def get_one_page(page_id :int=1):
 
 # マップにピンを表示するための情報を与える関数
 @app.get("/map")
-async def get_location(myx:float, myy:float):
-
-    # 配列の初期化
-    dists: List[float] = []
-    search_result: List[int] = []
+def get_location(myx:float, myy:float):
+    dists = []
+    data = []
+    search_result = []
 
     # 保存されているメタデータから座標の距離を求める
-    find: dict = search_locations.find_one({}, {"_id" : False})
+    finds = file_data.find({"other":{"$exists": True}}, {"_id" : False})
 
     # 自身の座標と写真の座標との距離を求める
-    for f in find["locations"]:
-        dx: float = f[0] - myx
-        dy: float = f[1] - myy
-        dists.append(math.sqrt(dx*dx + dy*dy))
-
-    # 表示数を決める
-    display_num:int = 5 if (len(dists) > 5) else len(dists)
+    for find in list(finds):
+        file_name = find["file_name"]
+        location = find["other"]["location"]
+        x = location["x"]
+        y = location["y"]
+        dx = x - myx
+        dy = y - myy
+        r = math.sqrt(dx*dx + dy*dy)
+        data.append({"file_name":file_name, "x":x, "y":y, "r":r})
+        dists.append(r)
     
-    # 距離が短い順に表示数の数だけ抜き出す
-    sorted_dists = sorted(dists)
-    for i in range(display_num):
-        index = dists.index(sorted_dists[i])+1
-        search_result.append(index)
+    # 距離が短い順に並べる
+    dists_sort = sorted(dists)
+    for dist in dists_sort:
+        for d in data:
+            if dist==d["r"]:
+                search_result.append(d)
 
-    return {"result": search_result}
+    return search_result
 
 # 新しいメタデータを追加するための関数
 @app.post("/page")
