@@ -22,7 +22,7 @@ class User:
 
         payload = {
             "id" : user_id,
-            "exp" : exp.strftime("%Y-%m-%d %H:%M")
+            "ex" : exp.strftime("%Y-%m-%d %H:%M")
         }
         result = jwt.encode(payload, KEY, algorithm="HS256")
         return result
@@ -30,13 +30,13 @@ class User:
     @classmethod
     def get_id(cls, token):
         # JWTの期限を確認する
-        data = jwt.decode(token, KEY, algorithm="HS256")
-        data_exp = datetime.datetime.strptime(data["exp"], "%Y-%m-%d %H:%M")
+        data = jwt.decode(token, KEY, algorithms=["HS256"])
+        data_exp = datetime.datetime.strptime(data["ex"], "%Y-%m-%d %H:%M")
         dt_now = datetime.datetime.now()
-        if (dt_now < data_exp):
+        if (dt_now > data_exp):
             return "exp error"
         
-        # ユーザーID
+        # ユーザーIDの取得
         user_id = data["id"]
         return user_id
 
@@ -60,9 +60,10 @@ class User:
         else:
             # DBにユーザーの情報を追加
             self.user_data.insert_one(user_doc)
+            token= User.cleate_token(user_doc["id"])
 
             # 作成したユーザーのIDを返す
-            return {"user_id" : user_doc["id"]}
+            return {"token" : token}
 
     # ユーザーがDBにあるか確認して存在すればIDを返却する
     def login(self, user):
@@ -76,12 +77,13 @@ class User:
     def get_user(self, token):
         user_id = User.get_id(token=token)
 
-        find = self.user_data.find_one({"id": user_id}, {"_id": False})
-
-        # 返せる情報のみを抜き出して返す
-        user_doc = {
-            "name" : find["name"],
-            "checked" : find["checked"]
-        }
-
-        return user_doc
+        if (user_id!="exp error"):
+            find = self.user_data.find_one({"id": user_id}, {"_id": False})
+            # 返せる情報のみを抜き出して返す
+            user_doc = {
+                "name" : find["name"],
+                "checked" : find["checked"]
+            }
+            return user_doc
+        else:
+            return user_id

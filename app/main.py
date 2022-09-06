@@ -135,8 +135,8 @@ def login(user: model.User):
     return user_data.login(user=user)
 
 # ユーザーを情報を取得する
-@app.get("/user/{user_id}")
-def get_user(token: str = ".."):
+@app.get("/user")
+def get_user(token:str):
     user_data = User()
     return user_data.get_user(token=token)
 
