@@ -20,11 +20,17 @@ class User:
             "checked" : []
         }
 
-        # DBにユーザーの情報を追加
-        self.user_data.insert_one(user_doc)
+        # 同じ名前の人が存在するか確認
+        find = self.user_data.find_one({"name" : user.name}, {"_id" : False})
 
-        # 作成したユーザーのIDを返す
-        return {"user_id" : num + 1}
+        if (find):
+            return {"user_id" : "exist name"}
+        else:
+            # DBにユーザーの情報を追加
+            self.user_data.insert_one(user_doc)
+
+            # 作成したユーザーのIDを返す
+            return {"user_id" : user_doc["id"]}
 
     # ユーザーがDBにあるか確認して存在すればIDを返却する
     def login(self, user):
