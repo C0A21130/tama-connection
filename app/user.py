@@ -1,4 +1,9 @@
+import os
+import datetime
 from database import DataBase
+import jwt
+
+KEY = os.environ["KEY"]
 
 # ユーザー情報のクラス
 class User:
@@ -7,6 +12,24 @@ class User:
         # ユーザーDBの接続
         self.db = DataBase()
         self.user_data = self.db.get_collection(collection_name="user_data")
+
+    # JWTのトークンを生成する
+    @classmethod
+    def cleate_token(cls, user_id):
+        dt_now = datetime.datetime.now()
+        td_1d = datetime.timedelta(days=10)
+        exp = dt_now + td_1d
+
+        payload = {
+            "id" : user_id,
+            "exp" : exp.strftime("%Y-%m-%d %H:%M")
+        }
+        result = jwt.encode(payload, KEY, algorithm="HS256")
+        return result
+
+    @classmethod
+    def get_id(cls, token):
+        pass
 
     # ユーザーの情報を追加
     def post_user(self, user):
@@ -36,8 +59,9 @@ class User:
     def login(self, user):
         find = self.user_data.find_one({"$and":[{"name":user.name},{"password":user.password}]}, {"_id": False})
         user_id = find["id"]
+        token = User.cleate_token(user_id=user_id)
 
-        return {"user_id":user_id}
+        return {"token" : token}
 
     # ユーザーの情報を返す
     def get_user(self, user_id):
