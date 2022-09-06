@@ -129,6 +129,12 @@ def post_page(page: model.Page):
 
     return result
 
+# ログインして自身のIDを確認する
+@app.get("/user")
+def login(user: model.User):
+    user_data = User()
+    return user_data.login(user=user)
+
 # ユーザーを情報を取得する
 @app.get("/user/{user_id}")
 def get_user(user_id: int = 1):

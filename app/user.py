@@ -27,10 +27,11 @@ class User:
         return {"user_id" : num + 1}
 
     # ユーザーがDBにあるか確認して存在すればIDを返却する
-    # def login(self, user):
-    #     find = self.user_data.find_one({"": [{"name"}, {}]}, {"_id", False})
+    def login(self, user):
+        find = self.user_data.find_one({"$and":[{"name":user.name},{"password":user.password}]}, {"_id": False})
+        user_id = find["id"]
 
-    #     return {"user_id": user_id}
+        return {"user_id":user_id}
 
     # ユーザーの情報を返す
     def get_user(self, user_id):
