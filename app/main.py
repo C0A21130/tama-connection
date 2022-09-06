@@ -130,7 +130,7 @@ def post_page(page: model.Page):
     return result
 
 # ログインして自身のIDを確認する
-@app.get("/user")
+@app.post("/login")
 def login(user: model.User):
     user_data = User()
     return user_data.login(user=user)
@@ -142,7 +142,7 @@ def get_user(user_id: int = 1):
     return user_data.get_user(user_id=user_id)
 
 # ユーザーの追加する
-@app.post("/user")
+@app.post("/regist")
 def p_user(user: model.User):
     user_data = User()
     return user_data.post_user(user=user)
