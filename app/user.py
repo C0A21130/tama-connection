@@ -14,8 +14,8 @@ class User:
         num = self.user_data.count_documents({})
 
         user_doc = {
-            "user_id" : num + 1,
-            "user_name" : user.name,
+            "id" : num + 1,
+            "name" : user.name,
             "password" : user.password,
             "checked" : []
         }
@@ -26,13 +26,19 @@ class User:
         # 作成したユーザーのIDを返す
         return {"user_id" : num + 1}
 
+    # ユーザーがDBにあるか確認して存在すればIDを返却する
+    # def login(self, user):
+    #     find = self.user_data.find_one({"": [{"name"}, {}]}, {"_id", False})
+
+    #     return {"user_id": user_id}
+
     # ユーザーの情報を返す
     def get_user(self, user_id):
-        find = self.user_data.find_one({"user_id": user_id}, {"_id": False})
+        find = self.user_data.find_one({"id": user_id}, {"_id": False})
 
         # 返せる情報のみを抜き出して返す
         user_doc = {
-            "user_name" : find["user_name"],
+            "name" : find["name"],
             "checked" : find["checked"]
         }
 
