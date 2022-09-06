@@ -29,7 +29,16 @@ class User:
 
     @classmethod
     def get_id(cls, token):
-        pass
+        # JWTの期限を確認する
+        data = jwt.decode(token, KEY, algorithm="HS256")
+        data_exp = datetime.datetime.strptime(data["exp"], "%Y-%m-%d %H:%M")
+        dt_now = datetime.datetime.now()
+        if (dt_now < data_exp):
+            return "exp error"
+        
+        # ユーザーID
+        user_id = data["id"]
+        return user_id
 
     # ユーザーの情報を追加
     def post_user(self, user):
@@ -64,7 +73,9 @@ class User:
         return {"token" : token}
 
     # ユーザーの情報を返す
-    def get_user(self, user_id):
+    def get_user(self, token):
+        user_id = User.get_id(token=token)
+
         find = self.user_data.find_one({"id": user_id}, {"_id": False})
 
         # 返せる情報のみを抜き出して返す

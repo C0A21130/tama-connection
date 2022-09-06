@@ -136,9 +136,9 @@ def login(user: model.User):
 
 # ユーザーを情報を取得する
 @app.get("/user/{user_id}")
-def get_user(user_id: int = 1):
+def get_user(token: str = ".."):
     user_data = User()
-    return user_data.get_user(user_id=user_id)
+    return user_data.get_user(token=token)
 
 # ユーザーの追加する
 @app.post("/regist")
