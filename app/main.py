@@ -70,12 +70,12 @@ def get_location(myx:float, myy:float):
     search_result = []
 
     # 保存されているメタデータから座標の距離を求める
-    finds = file_data.find({"other":{"$exists": True}}, {"_id" : False})
+    finds = file_data.find({"location":{"$exists": True}}, {"_id" : False})
 
     # 自身の座標と写真の座標との距離を求める
     for find in list(finds):
         file_name = find["file_name"]
-        location = find["other"]["location"]
+        location = find["location"]
         x = location["x"]
         y = location["y"]
         dx = x - myx
@@ -103,8 +103,8 @@ def post_page(page: model.Page):
     # 新しいページ番号の作成
     next_files_num: int = finds_num + 1
     
-    page_x:float = page.other.location.x
-    page_y:float = page.other.location.y
+    page_x:float = page.location.x
+    page_y:float = page.location.y
 
     # 受けとったjsonデータから新しいページを作成する
     new_page = {
@@ -112,13 +112,10 @@ def post_page(page: model.Page):
         "title": page.title,
         "tag": page.tag,
         "text": page.text,
-        "other": {
-            "user": page.other.user,
-            "location": {
-                "x": page_x,
-                "y": page_y
-            },
-            "good": 0
+        "user": page.user,
+        "location": {
+            "x": page_x,
+            "y": page_y
         },
         "image" : page.image
     }
