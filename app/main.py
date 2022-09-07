@@ -128,6 +128,12 @@ def post_page(page: model.Page):
 
     return result
 
+# ユーザーの追加する
+@app.post("/regist")
+def regist(user: model.User):
+    user_data = User()
+    return user_data.regist(user=user)
+
 # ログインして自身のIDを確認する
 @app.post("/login")
 def login(user: model.User):
@@ -139,9 +145,3 @@ def login(user: model.User):
 def get_user(token:str):
     user_data = User()
     return user_data.get_user(token=token)
-
-# ユーザーの追加する
-@app.post("/regist")
-def p_user(user: model.User):
-    user_data = User()
-    return user_data.post_user(user=user)

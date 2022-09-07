@@ -12,6 +12,7 @@ class User:
         # ユーザーDBの接続
         self.db = DataBase()
         self.user_data = self.db.get_collection(collection_name="user_data")
+        self.file_data = self.db.get_collection(collection_name="file_data")
 
     # JWTのトークンを生成する
     @classmethod
@@ -41,7 +42,7 @@ class User:
         return user_id
 
     # ユーザーの情報を追加
-    def post_user(self, user):
+    def regist(self, user):
         # ユーザー数の確認
         num = self.user_data.count_documents({})
 
@@ -79,11 +80,13 @@ class User:
 
         if (user_id!="exp error"):
             find = self.user_data.find_one({"id": user_id}, {"_id": False})
+            files = self.file_data.find({"user":find["name"]}, {"_id":False})
             # 返せる情報のみを抜き出して返す
             user_doc = {
                 "name" : find["name"],
-                "checked" : find["checked"]
+                "checked" : find["checked"],
+                "files" : list(files)
             }
             return user_doc
         else:
-            return user_id
+            return "exp eroor"
