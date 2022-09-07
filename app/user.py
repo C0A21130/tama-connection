@@ -90,3 +90,15 @@ class User:
             return user_doc
         else:
             return "exp eroor"
+
+    def add_medal(self, user_id, shop_id):
+        find = self.user_data.find_one({"id":user_id}, {"_id" : False})
+
+        # すでにそのチェックポイントを巡回したか確認
+        for checked_id in find["checked"]:
+            if (checked_id == shop_id):
+                return "error checked"
+        
+        # 追加
+        self.user_data.update_one({"id":user_id}, {"$push": {"checked":shop_id}})
+        return "success"
