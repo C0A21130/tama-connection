@@ -95,7 +95,7 @@ def get_location(myx:float, myy:float):
 
 # 新しいメタデータを追加するための関数
 @app.post("/page")
-def post_page(page: model.Page):
+def post_page(page: model.Page, token: str = Header(None)):
 
     # DBからデータ数を読み取る
     finds_num:int = file_data.count_documents({})
@@ -112,7 +112,7 @@ def post_page(page: model.Page):
         "title": page.title,
         "tag": page.tag,
         "text": page.text,
-        "user": page.user,
+        "user": User.get_id(token=token),
         "location": {
             "x": page_x,
             "y": page_y

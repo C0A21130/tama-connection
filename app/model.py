@@ -9,8 +9,7 @@ class Page(BaseModel):
     title: str
     tag: str
     text: str
-    user: str
-    Location: Location
+    location: Location
     image: str
 
 # post_user関数の受け取るjsonデータの型

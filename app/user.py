@@ -80,7 +80,7 @@ class User:
 
         if (user_id!="exp error"):
             find = self.user_data.find_one({"id": user_id}, {"_id": False})
-            files = self.file_data.find({"user":find["name"]}, {"_id":False})
+            files = self.file_data.find({"user":user_id}, {"_id":False})
             # 返せる情報のみを抜き出して返す
             user_doc = {
                 "name" : find["name"],
