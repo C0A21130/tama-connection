@@ -75,21 +75,17 @@ class User:
         return {"token" : token}
 
     # ユーザーの情報を返す
-    def get_user(self, token):
-        user_id = User.get_id(token=token)
+    def get_user(self, user_id):
 
-        if (user_id!="exp error"):
-            find = self.user_data.find_one({"id": user_id}, {"_id": False})
-            files = self.file_data.find({"user":user_id}, {"_id":False})
-            # 返せる情報のみを抜き出して返す
-            user_doc = {
-                "name" : find["name"],
-                "checked" : find["checked"],
-                "files" : list(files)
-            }
-            return user_doc
-        else:
-            return "exp eroor"
+        find = self.user_data.find_one({"id": user_id}, {"_id": False})
+        files = self.file_data.find({"user":user_id}, {"_id":False})
+        # 返せる情報のみを抜き出して返す
+        user_doc = {
+            "name" : find["name"],
+            "checked" : find["checked"],
+            "files" : list(files)
+        }
+        return user_doc
 
     def add_medal(self, user_id, shop_id):
         find = self.user_data.find_one({"id":user_id}, {"_id" : False})

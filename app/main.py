@@ -141,10 +141,17 @@ def login(user: model.User):
 @app.get("/user")
 def get_user(token: str = Header(None)):
     user_data = User()
-    return user_data.get_user(token=token)
+    user_id = User.get_id(token=token)
+    if (user_id!="exp error"):
+        return user_data.get_user(user_id=user_id)
+    else:
+        return "exp error"
 
 @app.put("/user")
 def add_medal(shop_id:int, token: str = Header(None)):
     user_data = User()
     user_id = User.get_id(token=token)
-    return user_data.add_medal(user_id, shop_id)
+    if (user_id!="exp error"):
+        return user_data.add_medal(user_id, shop_id)
+    else:
+        return "exp error"
