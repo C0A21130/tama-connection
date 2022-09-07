@@ -1,4 +1,4 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, Header
 from fastapi.middleware.cors import CORSMiddleware
 import math
 import model
@@ -139,6 +139,6 @@ def login(user: model.User):
 
 # ユーザーを情報を取得する
 @app.get("/user")
-def get_user(token:str):
+def get_user(token: str = Header(None)):
     user_data = User()
     return user_data.get_user(token=token)
