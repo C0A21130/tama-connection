@@ -74,14 +74,21 @@ def get_location(myx:float, myy:float):
 
     # 自身の座標と写真の座標との距離を求める
     for find in list(finds):
+        # DBから取得した情報を変数に代入
         file_name = find["file_name"]
+        title = find["title"]
+        tag = find["tag"]
+        image = find["image"]
         location = find["location"]
+
+        # 自身の座標からの距離を求める
         x = location["x"]
         y = location["y"]
         dx = x - myx
         dy = y - myy
         r = math.sqrt(dx*dx + dy*dy)
-        data.append({"file_name":file_name, "x":x, "y":y, "r":r})
+
+        data.append({"file_name":file_name, "title":title, "tag": tag,  "x":x, "y":y, "r":r, "image": image})
         dists.append(r)
     
     # 距離が短い順に並べる

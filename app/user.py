@@ -57,7 +57,7 @@ class User:
         find = self.user_data.find_one({"name" : user.name}, {"_id" : False})
 
         if (find):
-            return {"user_id" : "exist name"}
+            return {"token" : "exist name"}
         else:
             # DBにユーザーの情報を追加
             self.user_data.insert_one(user_doc)
