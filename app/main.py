@@ -4,6 +4,7 @@ import math
 import model
 from database import DataBase
 from user import User
+from page import Page
 
 # DBの接続
 db = DataBase()
@@ -11,6 +12,8 @@ search_locations = db.get_collection(collection_name="search_locations")
 file_data = db.get_collection(collection_name="file_data")
 
 app = FastAPI()
+page = Page()
+user = User()
 
 # CORSの設定
 origins = [
@@ -34,33 +37,12 @@ def hello():
 # 投稿したページをタグから検索して表示する関数
 @app.get("/page")
 def get_page():
-
-    search_result = {"kankou": [], "gurume": [], "tamasanpo":[], "omiyage":[]}
-
-    tags  = ["kankou", "gurume", "tamasanpo" ,"omiyage"]
-    page_names:dict = {"kankou": [], "gurume": [], "tamasanpo":[], "omiyage":[]}
-
-    # 該当するタグのページの名前をDBから検索する
-    for tag in tags:
-        finds = file_data.find({"tag" : tag}, {"_id": False})
-        for find in list(finds):
-            page_names[tag].append(find["file_name"])
-
-    # 検索されたページの名前から該当するページのデータをDBから取得する
-    for tag in page_names:
-        for page_name in page_names[tag]:
-            page_data =  get_one_page(page_id=page_name)
-            search_result[tag].append(page_data)
-
-    return search_result
+    return page.get_page()
 
 # 1つの投稿されたファイルのメタデータ情報を表示する関数
 @app.get("/page/{page_id}")
 def get_one_page(page_id :int=1):
-    # 指定したページ番号から情報を取得する
-    search_result: dict = file_data.find_one({"file_name" : page_id}, {"_id" : False})
-
-    return search_result
+    return page.get_one_page(page_id=page_id)
 
 # マップにピンを表示するための情報を与える関数
 @app.get("/map")
@@ -102,63 +84,36 @@ def get_location(myx:float, myy:float):
 
 # 新しいメタデータを追加するための関数
 @app.post("/page")
-def post_page(page: model.Page, token: str = Header(None)):
-
-    # DBからデータ数を読み取る
-    finds_num:int = file_data.count_documents({})
-    
-    # 新しいページ番号の作成
-    next_files_num: int = finds_num + 1
-    
-    page_x:float = page.location.x
-    page_y:float = page.location.y
-
-    # 受けとったjsonデータから新しいページを作成する
-    new_page = {
-        "file_name": next_files_num,
-        "title": page.title,
-        "tag": page.tag,
-        "text": page.text,
-        "user": User.get_id(token=token),
-        "location": {
-            "x": page_x,
-            "y": page_y
-        },
-        "image" : page.image
-    }
-
-    # 新しく作成したデータをDBに追加
-    result = file_data.insert_one(new_page)
-
-    return result
+def post_page(page_response: model.Page, token: str = Header(None)):
+    user_id = User.get_id(token=token)
+    if (user_id!="exp error"):
+        return page.post_page(page=page_response, user_id=user_id)
+    else:
+        return "exp error"
 
 # ユーザーの追加する
 @app.post("/regist")
 def regist(user: model.User):
-    user_data = User()
-    return user_data.regist(user=user)
+    return user.regist(user=user)
 
 # ログインして自身のIDを確認する
 @app.post("/login")
-def login(user: model.User):
-    user_data = User()
-    return user_data.login(user=user)
+def login(user_response: model.User):
+    return user.login(user=user_response)
 
 # ユーザーを情報を取得する
 @app.get("/user")
 def get_user(token: str = Header(None)):
-    user_data = User()
     user_id = User.get_id(token=token)
     if (user_id!="exp error"):
-        return user_data.get_user(user_id=user_id)
+        return user.get_user(user_id=user_id)
     else:
         return "exp error"
 
 @app.put("/user")
 def add_medal(shop_id:int, token: str = Header(None)):
-    user_data = User()
     user_id = User.get_id(token=token)
     if (user_id!="exp error"):
-        return user_data.add_medal(user_id, shop_id)
+        return user.add_medal(user_id, shop_id)
     else:
         return "exp error"
