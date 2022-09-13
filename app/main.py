@@ -89,7 +89,7 @@ def post_page(page_response: model.Page, token: str = Header(None)):
     if (user_id!="exp error"):
         return page.post_page(page=page_response, user_id=user_id)
     else:
-        return "exp error"
+        return {"error" : "exp error"}
 
 # ユーザーの追加する
 @app.post("/regist")
@@ -108,12 +108,13 @@ def get_user(token: str = Header(None)):
     if (user_id!="exp error"):
         return user.get_user(user_id=user_id)
     else:
-        return "exp error"
+        return {"error" : "exp error"}
 
+# お店のメダルを登録する
 @app.put("/user")
 def add_medal(shop_id:int, token: str = Header(None)):
     user_id = User.get_id(token=token)
     if (user_id!="exp error"):
         return user.add_medal(user_id, shop_id)
     else:
-        return "exp error"
+        return {"exp error": "exp error" }
