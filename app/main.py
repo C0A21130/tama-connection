@@ -106,6 +106,6 @@ def get_user(token: str = Header(None)):
 
 # お店のメダルを登録する
 @app.put("/user")
-def add_medal(shop_id:int, token: str = Header(None)):
+def add_medal(shop: model.Shop, token: str = Header(None)):
     user_id = User.get_id(token=token)
-    return user.add_medal(user_id, shop_id)
+    return user.add_medal(user_id, shop.shop_id)
