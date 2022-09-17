@@ -86,10 +86,7 @@ def get_location(myx:float, myy:float):
 @app.post("/page")
 def post_page(page_response: model.Page, token: str = Header(None)):
     user_id = User.get_id(token=token)
-    if (user_id!="exp error"):
-        return page.post_page(page=page_response, user_id=user_id)
-    else:
-        return {"error" : "exp error"}
+    return page.post_page(page=page_response, user_id=user_id)
 
 # ユーザーの追加する
 @app.post("/regist")
@@ -105,16 +102,10 @@ def login(user_response: model.User):
 @app.get("/user")
 def get_user(token: str = Header(None)):
     user_id = User.get_id(token=token)
-    if (user_id!="exp error"):
-        return user.get_user(user_id=user_id)
-    else:
-        return {"error" : "exp error"}
+    return user.get_user(user_id=user_id)
 
 # お店のメダルを登録する
 @app.put("/user")
 def add_medal(shop_id:int, token: str = Header(None)):
     user_id = User.get_id(token=token)
-    if (user_id!="exp error"):
-        return user.add_medal(user_id, shop_id)
-    else:
-        return {"exp error": "exp error" }
+    return user.add_medal(user_id, shop_id)

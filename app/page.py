@@ -60,6 +60,6 @@ class Page:
         }
 
         # 新しく作成したデータをDBに追加
-        result = self.file_data.insert_one(new_page)
+        self.file_data.insert_one(new_page)
 
         return next_files_num

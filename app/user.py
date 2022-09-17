@@ -18,24 +18,19 @@ class User:
     @classmethod
     def cleate_token(cls, user_id):
         dt_now = datetime.datetime.now()
-        td_1d = datetime.timedelta(days=10)
-        exp = dt_now + td_1d
 
         payload = {
             "id" : user_id,
-            "ex" : exp.strftime("%Y-%m-%d %H:%M")
+            "ex" : dt_now.strftime("%Y-%m-%d %H:%M")
         }
         result = jwt.encode(payload, KEY, algorithm="HS256")
         return result
 
+    # JWTトークンからユーザーIDを習得する
     @classmethod
     def get_id(cls, token):
-        # JWTの期限を確認する
+        # JWTをデコードする
         data = jwt.decode(token, KEY, algorithms=["HS256"])
-        data_exp = datetime.datetime.strptime(data["ex"], "%Y-%m-%d %H:%M")
-        dt_now = datetime.datetime.now()
-        if (dt_now > data_exp):
-            return "exp error"
         
         # ユーザーIDの取得
         user_id = data["id"]
