@@ -1,7 +1,8 @@
 import os
 import datetime
-from database import DataBase
 import jwt
+import hashlib
+from database import DataBase
 
 KEY = os.environ["KEY"]
 
@@ -40,11 +41,12 @@ class User:
     def regist(self, user):
         # ユーザー数の確認
         num = self.user_data.count_documents({})
+        temp = f"{user.name}{user.password}"
 
         user_doc = {
             "id" : num + 1,
             "name" : user.name,
-            "password" : user.password,
+            "password" : hashlib.sha256(temp.encode("UTF-8")).hexdigest(),
             "checked" : []
         }
 
@@ -63,7 +65,8 @@ class User:
 
     # ユーザーがDBにあるか確認して存在すればIDを返却する
     def login(self, user):
-        find = self.user_data.find_one({"$and":[{"name":user.name},{"password":user.password}]}, {"_id": False})
+        temp = f"{user.name}{user.password}"
+        find = self.user_data.find_one({"$and":[{"name":user.name},{"password":hashlib.sha256(temp.encode("UTF-8")).hexdigest()}]}, {"_id": False})
         user_id = find["id"]
         token = User.cleate_token(user_id=user_id)
 

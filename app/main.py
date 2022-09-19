@@ -90,8 +90,8 @@ def post_page(page_response: model.Page, token: str = Header(None)):
 
 # ユーザーの追加する
 @app.post("/regist")
-def regist(user: model.User):
-    return user.regist(user=user)
+def regist(user_response: model.User):
+    return user.regist(user=user_response)
 
 # ログインして自身のIDを確認する
 @app.post("/login")
