@@ -1,4 +1,7 @@
+import math
 from database import DataBase
+
+PER_PAGE_DOCS = 4
 
 class Page:
 
@@ -18,25 +21,26 @@ class Page:
         self.file_data = self.db.get_collection(collection_name="file_data")
     
     # 複数ページを取得する
-    def get_page(self):
-        search_result = {"kankou": [], "gurume": [], "tamasanpo":[], "omiyage":[]}
-
+    def get_pages(self, tag, page_num):
+        search_result = []
         tags  = ["kankou", "gurume", "tamasanpo" ,"omiyage"]
-        page_names:dict = {"kankou": [], "gurume": [], "tamasanpo":[], "omiyage":[]}
 
-        # 該当するタグのページの名前をDBから検索する
-        for tag in tags:
-            finds = self.file_data.find({"tag" : tag}, {"_id": False})
-            for find in list(finds):
-                page_names[tag].append(find["file_name"])
+        # DBに保存されている投稿記事をタグから検索する
+        docs = self.file_data.find({"tag" : tag}, {"_id": False})
+        finds = list(docs)
+        finds_num = len(finds) - 1
 
-        # 検索されたページの名前から該当するページのデータをDBから取得する
-        for tag in page_names:
-            for page_name in page_names[tag]:
-                page_data =  Page.get_one_page(page_id=page_name)
-                search_result[tag].append(page_data)
+        # 投稿記事からページの数とそのページの最後の投稿記事の番号を求める
+        max_page = math.ceil(finds_num / PER_PAGE_DOCS)
+        end_doc_num = finds_num - (PER_PAGE_DOCS * page_num)
 
-        return search_result
+        # 投稿記事を取り出す
+        for i in range(end_doc_num, end_doc_num-PER_PAGE_DOCS, -1):
+            if (i > -1):
+                doc = finds[i]
+                search_result.append(doc)
+
+        return {"result":search_result, "max":max_page}
 
     def post_page(self, page, user_id: int):
         # DBからデータ数を読み取る
