@@ -1,7 +1,7 @@
 import math
 from database import DataBase
 
-PER_PAGE_DOCS = 4
+PER_PAGE_DOCS = 3
 
 class Page:
 
@@ -23,7 +23,12 @@ class Page:
     # 複数ページを取得する
     def get_pages(self, tag, page_num):
         search_result = []
-        tags  = ["kankou", "gurume", "tamasanpo" ,"omiyage"]
+        max_page = {
+            "kankou": self.file_data.count_documents({"tag":"kankou"}), 
+            "gurume": self.file_data.count_documents({"tag":"gurume"}),
+            "tamasanpo": self.file_data.count_documents({"tag":"tamasanpo"}),
+            "omiyage": self.file_data.count_documents({"tag":"omiyage"}),
+        }
 
         # DBに保存されている投稿記事をタグから検索する
         docs = self.file_data.find({"tag" : tag}, {"_id": False})
@@ -31,7 +36,6 @@ class Page:
         finds_num = len(finds) - 1
 
         # 投稿記事からページの数とそのページの最後の投稿記事の番号を求める
-        max_page = math.ceil(finds_num / PER_PAGE_DOCS)
         end_doc_num = finds_num - (PER_PAGE_DOCS * page_num)
 
         # 投稿記事を取り出す
