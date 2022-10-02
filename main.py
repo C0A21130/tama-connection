@@ -35,9 +35,9 @@ def hello():
     return {"hello" : "Hello World"}
 
 # 投稿したページをタグから検索して表示する関数
-@app.get("/page")
-def get_page():
-    return page.get_page()
+@app.get("/pages")
+def get_pages(tag:str, pageNum:int):
+    return page.get_pages(tag=tag, page_num=pageNum)
 
 # 1つの投稿されたファイルのメタデータ情報を表示する関数
 @app.get("/page/{page_id}")
