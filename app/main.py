@@ -1,5 +1,6 @@
 from fastapi import FastAPI, Header
 from fastapi.middleware.cors import CORSMiddleware
+import uvicorn
 import math
 import model
 from database import DataBase
@@ -121,3 +122,6 @@ def get_user(token: str = Header(None)):
 def add_medal(shop: model.Shop, token: str = Header(None)):
     user_id = User.get_id(token=token)
     return user.add_medal(user_id, shop.shop_id)
+
+if __name__ == "__main__":
+    uvicorn.run(app=app, port=8000)
