@@ -15,12 +15,13 @@ app = FastAPI()
 page = Page()
 user = User()
 
-# CORSの設定
+# CORSの接続許可
 origins = [
     "http://localhost:3000",
-    "https://lemon-bush-0663dd310.1.azurestaticapps.net"
+    "http://tk2-123-61896.vs.sakura.ne.jp"
 ]
 
+# CORSの設定
 app.add_middleware(
     CORSMiddleware,
     allow_origins=origins,

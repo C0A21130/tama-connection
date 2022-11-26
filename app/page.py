@@ -1,4 +1,3 @@
-import math
 from database import DataBase
 
 PER_PAGE_DOCS = 3
