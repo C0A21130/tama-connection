@@ -1,5 +1,6 @@
 from fastapi import FastAPI, Header
 from fastapi.middleware.cors import CORSMiddleware
+import uvicorn
 import math
 import model
 from database import DataBase
@@ -15,12 +16,13 @@ app = FastAPI()
 page = Page()
 user = User()
 
-# CORSの設定
+# CORSの接続許可
 origins = [
     "http://localhost:3000",
-    "https://lemon-bush-0663dd310.1.azurestaticapps.net"
+    "http://tk2-123-61896.vs.sakura.ne.jp"
 ]
 
+# CORSの設定
 app.add_middleware(
     CORSMiddleware,
     allow_origins=origins,
@@ -34,15 +36,32 @@ app.add_middleware(
 def hello():
     return {"hello" : "Hello World"}
 
-# 投稿したページをタグから検索して表示する関数
+# タグから投稿したページを検索して表示する関数
 @app.get("/pages")
 def get_pages(tag:str, pageNum:int):
     return page.get_pages(tag=tag, page_num=pageNum)
 
-# 1つの投稿されたファイルのメタデータ情報を表示する関数
+# 1つの投稿されたデータ情報を表示する関数
 @app.get("/page/{page_id}")
 def get_one_page(page_id :int=1):
     return page.get_one_page(page_id=page_id)
+
+# 新しい投稿データを追加するための関数
+@app.post("/page")
+def post_page(page_response: model.Page, token: str = Header(None)):
+    user_id = User.get_id(token=token)
+    return page.post_page(page=page_response, user_id=user_id)
+
+# 投稿データの更新
+@app.put("/page/{page_id}")
+def put_page(page_id: int, page_response:model.Page, token = Header(None)):
+    user_id = User.get_id(token=token)
+    return page.put_page(page_id=page_id, page=page_response, user_id=user_id)
+
+# 1つの投稿データを削除
+@app.delete("/page/{page_id}")
+def delete_page(page_id: int):
+    return page.delete_page(page_id=page_id)
 
 # マップにピンを表示するための情報を与える関数
 @app.get("/map")
@@ -82,12 +101,6 @@ def get_location(myx:float, myy:float):
 
     return search_result
 
-# 新しいメタデータを追加するための関数
-@app.post("/page")
-def post_page(page_response: model.Page, token: str = Header(None)):
-    user_id = User.get_id(token=token)
-    return page.post_page(page=page_response, user_id=user_id)
-
 # ユーザーの追加する
 @app.post("/regist")
 def regist(user_response: model.User):
@@ -109,3 +122,6 @@ def get_user(token: str = Header(None)):
 def add_medal(shop: model.Shop, token: str = Header(None)):
     user_id = User.get_id(token=token)
     return user.add_medal(user_id, shop.shop_id)
+
+if __name__ == "__main__":
+    uvicorn.run(app=app, port=8000)

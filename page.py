@@ -1,7 +1,6 @@
-import math
 from database import DataBase
 
-PER_PAGE_DOCS = 3
+PAGES_NUM = 3
 
 class Page:
 
@@ -22,40 +21,52 @@ class Page:
     
     # 複数ページを取得する
     def get_pages(self, tag, page_num):
-        search_result = []
+        # リストの初期化
+        kankou = list()
+        gurume = list()
+        tamasanpo = list()
+        omiyage = list()
+
+        # 取得したデータを分類する
+        for doc in list(self.file_data.find({},{"_id":False})):
+            if (doc["tag"] == "kankou"):
+                kankou.append(doc)
+            elif (doc["tag"] == "gurume"):
+                gurume.append(doc)
+            elif (doc["tag"] == "tamasanpo"):
+                tamasanpo.append(doc)
+            else:
+                omiyage.append(doc)
+
+        # 数を数える
         max_page = {
-            "kankou": self.file_data.count_documents({"tag":"kankou"}), 
-            "gurume": self.file_data.count_documents({"tag":"gurume"}),
-            "tamasanpo": self.file_data.count_documents({"tag":"tamasanpo"}),
-            "omiyage": self.file_data.count_documents({"tag":"omiyage"}),
+            "kankou": len(kankou), 
+            "gurume": len(gurume),
+            "tamasanpo": len(tamasanpo),
+            "omiyage": len(omiyage),
         }
 
-        # DBに保存されている投稿記事をタグから検索する
-        docs = self.file_data.find({"tag" : tag}, {"_id": False})
-        finds = list(docs)
-        finds_num = len(finds) - 1
+        # 取得する範囲の最初を決める
+        start_index = PAGES_NUM * page_num
 
-        # 投稿記事からページの数とそのページの最後の投稿記事の番号を求める
-        end_doc_num = finds_num - (PER_PAGE_DOCS * page_num)
+        # 結果を返却する
+        if (tag == "kankou"):
+            return {"result":kankou[start_index : start_index+PAGES_NUM], "max":max_page}
+        elif (tag == "gurume"):
+            return {"result":gurume[start_index : start_index+PAGES_NUM], "max":max_page}
+        elif (tag == "tamasanpo"):
+            return {"result":tamasanpo[start_index : start_index+PAGES_NUM], "max":max_page}
+        else:
+            return {"result":omiyage[start_index : start_index+PAGES_NUM], "max":max_page}
 
-        # 投稿記事を取り出す
-        for i in range(end_doc_num, end_doc_num-PER_PAGE_DOCS, -1):
-            if (i > -1):
-                doc = finds[i]
-                search_result.append(doc)
-
-        return {"result":search_result, "max":max_page}
-
+    # ページの投稿
     def post_page(self, page, user_id: int):
-        # DBからデータ数を読み取る
-        finds_num:int = self.file_data.count_documents({})
-        
-        # 新しいページ番号の作成
-        next_files_num: int = finds_num + 1
+        # DBからファイル名の最大値を読み取る
+        docs = list(self.file_data.find({}, {"_id":False}).sort("file_name", -1))
 
         # 受けとったjsonデータから新しいページを作成する
         new_page = {
-            "file_name": next_files_num,
+            "file_name": docs[0]["file_name"] + 1,
             "title": page.title,
             "tag": page.tag,
             "text": page.text,
@@ -70,4 +81,25 @@ class Page:
         # 新しく作成したデータをDBに追加
         self.file_data.insert_one(new_page)
 
-        return next_files_num
+        return docs[0]["file_name"] + 1
+
+    # 投稿したページの変更
+    def put_page(self, page_id, page, user_id):
+        update_page = {
+            "file_name": page_id,
+            "title": page.title,
+            "text": page.text,
+            "user": user_id,
+            "location": {
+                "x": page.location.x,
+                "y": page.location.y
+            },
+            "image": page.image
+        }
+        self.file_data.replace_one({"file_name":page_id}, update_page)
+        return page_id
+
+    # ページの削除
+    def delete_page(self, page_id):
+        self.file_data.delete_one({"file_name": page_id})
+        return page_id
