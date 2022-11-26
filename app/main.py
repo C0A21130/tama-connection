@@ -124,4 +124,4 @@ def add_medal(shop: model.Shop, token: str = Header(None)):
     return user.add_medal(user_id, shop.shop_id)
 
 if __name__ == "__main__":
-    uvicorn.run(app=app, port=8000)
+    uvicorn.run(app=app, port=5000)

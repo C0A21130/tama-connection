@@ -1,10 +1,9 @@
-import os
 import datetime
 import jwt
 import hashlib
 from database import DataBase
 
-KEY = os.environ["KEY"]
+KEY = ""
 
 # ユーザー情報のクラス
 class User:
