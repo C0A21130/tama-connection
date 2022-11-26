@@ -61,15 +61,12 @@ class Page:
 
     # ページの投稿
     def post_page(self, page, user_id: int):
-        # DBからデータ数を読み取る
-        finds_num:int = self.file_data.count_documents({})
-        
-        # 新しいページ番号の作成
-        next_files_num: int = finds_num + 1
+        # DBからファイル名の最大値を読み取る
+        docs = list(self.file_data.find({}, {"_id":False}).sort("file_name", -1))
 
         # 受けとったjsonデータから新しいページを作成する
         new_page = {
-            "file_name": next_files_num,
+            "file_name": docs[0]["file_name"] + 1,
             "title": page.title,
             "tag": page.tag,
             "text": page.text,
@@ -84,4 +81,4 @@ class Page:
         # 新しく作成したデータをDBに追加
         self.file_data.insert_one(new_page)
 
-        return next_files_num
+        return docs[0]["file_name"] + 1
