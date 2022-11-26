@@ -83,6 +83,22 @@ class Page:
 
         return docs[0]["file_name"] + 1
 
+    # 投稿したページの変更
+    def put_page(self, page_id, page, user_id):
+        update_page = {
+            "file_name": page_id,
+            "title": page.title,
+            "text": page.text,
+            "user": user_id,
+            "location": {
+                "x": page.location.x,
+                "y": page.location.y
+            },
+            "image": page.image
+        }
+        self.file_data.replace_one({"file_name":page_id}, update_page)
+        return page_id
+
     # ページの削除
     def delete_page(self, page_id):
         self.file_data.delete_one({"file_name": page_id})

@@ -51,6 +51,12 @@ def post_page(page_response: model.Page, token: str = Header(None)):
     user_id = User.get_id(token=token)
     return page.post_page(page=page_response, user_id=user_id)
 
+# 投稿データの更新
+@app.put("/page/{page_id}")
+def put_page(page_id: int, page_response:model.Page, token = Header(None)):
+    user_id = User.get_id(token=token)
+    return page.put_page(page_id=page_id, page=page_response, user_id=user_id)
+
 # 1つの投稿データを削除
 @app.delete("/page/{page_id}")
 def delete_page(page_id: int):
