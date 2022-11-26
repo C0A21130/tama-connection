@@ -82,3 +82,8 @@ class Page:
         self.file_data.insert_one(new_page)
 
         return docs[0]["file_name"] + 1
+
+    # ページの削除
+    def delete_page(self, page_id):
+        self.file_data.delete_one({"file_name": page_id})
+        return page_id

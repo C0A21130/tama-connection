@@ -35,15 +35,26 @@ app.add_middleware(
 def hello():
     return {"hello" : "Hello World"}
 
-# 投稿したページをタグから検索して表示する関数
+# タグから投稿したページを検索して表示する関数
 @app.get("/pages")
 def get_pages(tag:str, pageNum:int):
     return page.get_pages(tag=tag, page_num=pageNum)
 
-# 1つの投稿されたファイルのメタデータ情報を表示する関数
+# 1つの投稿されたデータ情報を表示する関数
 @app.get("/page/{page_id}")
 def get_one_page(page_id :int=1):
     return page.get_one_page(page_id=page_id)
+
+# 新しい投稿データを追加するための関数
+@app.post("/page")
+def post_page(page_response: model.Page, token: str = Header(None)):
+    user_id = User.get_id(token=token)
+    return page.post_page(page=page_response, user_id=user_id)
+
+# 1つの投稿データを削除
+@app.delete("/page/{page_id}")
+def delete_page(page_id: int):
+    return page.delete_page(page_id=page_id)
 
 # マップにピンを表示するための情報を与える関数
 @app.get("/map")
@@ -82,12 +93,6 @@ def get_location(myx:float, myy:float):
                 search_result.append(d)
 
     return search_result
-
-# 新しいメタデータを追加するための関数
-@app.post("/page")
-def post_page(page_response: model.Page, token: str = Header(None)):
-    user_id = User.get_id(token=token)
-    return page.post_page(page=page_response, user_id=user_id)
 
 # ユーザーの追加する
 @app.post("/regist")
