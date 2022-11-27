@@ -88,6 +88,7 @@ class Page:
         update_page = {
             "file_name": page_id,
             "title": page.title,
+            "tag": page.tag,
             "text": page.text,
             "user": user_id,
             "location": {
