@@ -51,12 +51,16 @@ class Page:
 
         # 結果を返却する
         if (tag == "kankou"):
+            kankou.reverse()
             return {"result":kankou[start_index : start_index+PAGES_NUM], "max":max_page}
         elif (tag == "gurume"):
+            gurume.reverse()
             return {"result":gurume[start_index : start_index+PAGES_NUM], "max":max_page}
         elif (tag == "tamasanpo"):
+            tamasanpo.reverse()
             return {"result":tamasanpo[start_index : start_index+PAGES_NUM], "max":max_page}
         else:
+            omiyage.reverse()
             return {"result":omiyage[start_index : start_index+PAGES_NUM], "max":max_page}
 
     # ページの投稿
@@ -88,6 +92,7 @@ class Page:
         update_page = {
             "file_name": page_id,
             "title": page.title,
+            "tag": page.tag,
             "text": page.text,
             "user": user_id,
             "location": {
