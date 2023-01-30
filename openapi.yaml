@@ -54,7 +54,7 @@ paths:
                     items:
                       type: object
                       properties:
-                        file_name:
+                        page_id:
                           type: integer
                         title:
                           type: string
@@ -98,7 +98,7 @@ paths:
               schema:
                 type: object
                 properties:
-                  file_name:
+                  page_id:
                     type: integer
                   title:
                     type: string
@@ -173,6 +173,39 @@ paths:
     post:
   "/map"
     get:
+      description: 位置情報の取得
+      parameters:
+        - name: myx
+          in: query
+          required: true
+          schema: { type: number }
+        - name: myy
+          in: query
+          required: true
+          schema: { type: number }
+      responses:
+        "200":
+          content:
+            "application/json":
+              schema:
+                type: object
+                properties:
+                  page_count:
+                    type: integer
+                  locations:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        location:
+                          type: object
+                          properties:
+                            x:
+                              type: number
+                            y:
+                              type: number
+                        page_id:
+                          type: integer
   "/regist"
     post:
       description: ユーザーの登録

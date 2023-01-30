@@ -66,40 +66,17 @@ def delete_page(page_id: int):
 # マップにピンを表示するための情報を与える関数
 @app.get("/map")
 def get_location(myx:float, myy:float):
-    dists = []
-    data = []
-    search_result = []
+    result = {"page_count": 0, "locations": []}
 
-    # 保存されているメタデータから座標の距離を求める
-    finds = file_data.find({"location":{"$exists": True}}, {"_id" : False})
+    # DBから座標データが存在するもののみ取り出す
+    finds = list(file_data.find({"location":{"$exists": True}}, {"_id" : False}))
 
-    # 自身の座標と写真の座標との距離を求める
-    for find in list(finds):
-        # DBから取得した情報を変数に代入
-        file_name = find["file_name"]
-        title = find["title"]
-        tag = find["tag"]
-        image = find["image"]
-        location = find["location"]
+    # 結果を代入
+    result["page_count"] = len(finds)
+    for find in finds:
+        result["locations"].append({"location": find["location"], "page_id": find["page_id"]})
 
-        # 自身の座標からの距離を求める
-        x = location["x"]
-        y = location["y"]
-        dx = x - myx
-        dy = y - myy
-        r = math.sqrt(dx*dx + dy*dy)
-
-        data.append({"file_name":file_name, "title":title, "tag": tag,  "x":x, "y":y, "r":r, "image": image})
-        dists.append(r)
-    
-    # 距離が短い順に並べる
-    dists_sort = sorted(dists)
-    for dist in dists_sort:
-        for d in data:
-            if dist==d["r"]:
-                search_result.append(d)
-
-    return search_result
+    return result
 
 # ユーザーの追加する
 @app.post("/regist")
