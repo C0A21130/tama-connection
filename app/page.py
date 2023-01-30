@@ -11,7 +11,7 @@ class Page:
         file_data = db.get_collection(collection_name="file_data")
 
         # 指定したページ番号から情報を取得する
-        search_result: dict = file_data.find_one({"file_name" : page_id}, {"_id" : False})
+        search_result: dict = file_data.find_one({"page_id" : page_id}, {"_id" : False})
 
         return search_result
 
@@ -66,11 +66,11 @@ class Page:
     # ページの投稿
     def post_page(self, page, user_id: int):
         # DBからファイル名の最大値を読み取る
-        docs = list(self.file_data.find({}, {"_id":False}).sort("file_name", -1))
+        docs = list(self.file_data.find({}, {"_id":False}).sort("page_id", -1))
 
         # 受けとったjsonデータから新しいページを作成する
         new_page = {
-            "file_name": docs[0]["file_name"] + 1,
+            "page_id": docs[0]["page_id"] + 1,
             "title": page.title,
             "tag": page.tag,
             "text": page.text,
@@ -85,12 +85,12 @@ class Page:
         # 新しく作成したデータをDBに追加
         self.file_data.insert_one(new_page)
 
-        return docs[0]["file_name"] + 1
+        return docs[0]["page_id"] + 1
 
     # 投稿したページの変更
     def put_page(self, page_id, page, user_id):
         update_page = {
-            "file_name": page_id,
+            "page_id": page_id,
             "title": page.title,
             "tag": page.tag,
             "text": page.text,
@@ -101,10 +101,10 @@ class Page:
             },
             "image": page.image
         }
-        self.file_data.replace_one({"file_name":page_id}, update_page)
+        self.file_data.replace_one({"page_id":page_id}, update_page)
         return page_id
 
     # ページの削除
     def delete_page(self, page_id):
-        self.file_data.delete_one({"file_name": page_id})
+        self.file_data.delete_one({"page_id": page_id})
         return page_id
