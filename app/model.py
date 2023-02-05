@@ -9,6 +9,7 @@ class Page(BaseModel):
     title: str
     tag: str
     text: str
+    location_name : str
     location: Location
     image: str
 
