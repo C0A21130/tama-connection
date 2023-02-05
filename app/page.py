@@ -75,6 +75,7 @@ class Page:
             "tag": page.tag,
             "text": page.text,
             "user": user_id,
+            "location_name": page.location_name,
             "location": {
                 "x": page.location.x,
                 "y": page.location.y
