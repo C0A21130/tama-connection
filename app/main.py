@@ -1,5 +1,6 @@
 from fastapi import FastAPI, Header
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.middleware.gzip import GZipMiddleware
 import uvicorn
 import math
 import model
@@ -30,6 +31,9 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"]
 )
+
+# gzipの設定
+app.add_middleware(GZipMiddleware, minimum_size=1000)
 
 # テストページを表示する関数
 @app.get("/")
