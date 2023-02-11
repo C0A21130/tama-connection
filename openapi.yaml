@@ -171,6 +171,34 @@ paths:
                 type: integer # 削除した投稿データのID
   "/page"
     post:
+      description: 投稿データの追加
+      parameters:
+        - name: token
+          in: header
+          required: true
+          schema:
+            type: string # JWT
+      requestBody:
+        content:
+          application/json:
+            schema:
+              title:
+                type: string
+              tag:
+                type: string # kankou or gurume or tamasanpo or omiyage
+              text:
+                type: string
+              location_name:
+                type: string
+              location:
+                type: object
+                properties:
+                  x:
+                    type: number
+                  y:
+                    type: number
+              image:
+                type: string # base64
   "/map"
     get:
       description: 位置情報の取得
