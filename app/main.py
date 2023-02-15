@@ -19,8 +19,7 @@ user = User()
 
 # CORSの接続許可
 origins = [
-    "http://localhost:3000",
-    "http://tk2-123-61896.vs.sakura.ne.jp"
+    "http://localhost:3000"
 ]
 
 # CORSの設定
@@ -120,10 +119,10 @@ def get_user(token: str = Header(None)):
     return user.get_user(user_id=user_id)
 
 # お店のメダルを登録する
-@app.put("/user")
-def add_medal(shop: model.Shop, token: str = Header(None)):
+@app.get("/users")
+def add_medal(token: str = Header(None)):
     user_id = User.get_id(token=token)
-    return user.add_medal(user_id, shop.shop_id)
+    return user.get_users(user_id=user_id)
 
 if __name__ == "__main__":
     uvicorn.run(app=app, port=5000)
