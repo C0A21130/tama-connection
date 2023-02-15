@@ -85,14 +85,11 @@ class User:
         }
         return user_doc
 
-    def add_medal(self, user_id, shop_id):
-        find = self.user_data.find_one({"id":user_id}, {"_id" : False})
-
-        # すでにそのチェックポイントを巡回したか確認
-        for checked_id in find["checked"]:
-            if (checked_id == shop_id):
-                return "error checked"
-        
-        # 追加
-        self.user_data.update_one({"id":user_id}, {"$push": {"checked":shop_id}})
-        return "success"
+    # ユーザーの情報をすべて返す
+    def get_users(self, user_id: int):
+        users = self.user_data.find({}, {"_id": False})
+        for user in users:
+            if user["id"] == user_id: # JWTから取得したユーザーがDBに存在するか確認
+                if user["admin"]: # ユーザーが管理者か確認
+                    return len(list(users))
+        return "Not admin"

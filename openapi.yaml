@@ -330,26 +330,19 @@ paths:
                     type: array
                     items:
                       type: integer
-    put:
-      description: お店のメダルを追加する
+  "users"
+    get:
+      description: 管理者ならユーザーの登録数を取得する
       parameters:
         - name: token
           in: header
           required: true
           schema:
             type: string # JWT
-      responseBody:
-        content:
-          "application/json":
-            schema:
-              type: object
-              properties: 
-                shop_id:
-                  type: integer
       responses:
         content:
           "application/json":
             schema:
-              type: string
+              type: int # ユーザー数を返却
 
     
