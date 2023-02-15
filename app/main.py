@@ -19,7 +19,7 @@ user = User()
 
 # CORSの接続許可
 origins = [
-    "http://localhost:3000"
+    "https://tama-connect.com"
 ]
 
 # CORSの設定
