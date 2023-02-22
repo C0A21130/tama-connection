@@ -85,6 +85,18 @@ class User:
         }
         return user_doc
 
+    # ユーザーのパスワードを再設定する関数
+    def put_user(self, user_id: int, user):
+        access_user = self.user_data.find_one({"id": user_id}, {"_id": False})
+
+        # ユーザーが管理者かどうかを確認する
+        if access_user["admin"]: # ユーザーが管理者のとき
+            temp = f"{user.name}{user.password}"
+            self.user_data.update_one({"name": user.name}, {"$set": {"password": hashlib.sha256(temp.encode("UTF-8")).hexdigest()}})
+            return "change password"
+        else: # ユーザーが管理者でないとき
+            return "Not admin"
+
     # 管理者な全ユーザーの情報を返す関数
     def get_users(self, user_id: int):
         users = list(self.user_data.find({}, {"_id": False}))
