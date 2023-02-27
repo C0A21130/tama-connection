@@ -118,9 +118,15 @@ def get_user(token: str = Header(None)):
     user_id = User.get_id(token=token)
     return user.get_user(user_id=user_id)
 
+# ユーザーのパスワードを再設定する
+@app.put("/user")
+def put_user(user_response: model.User, token: str = Header(None)):
+    user_id = User.get_id(token=token)
+    return user.put_user(user_id=user_id, user=user_response)
+
 # お店のメダルを登録する
 @app.get("/users")
-def add_medal(token: str = Header(None)):
+def get_users(token: str = Header(None)):
     user_id = User.get_id(token=token)
     return user.get_users(user_id=user_id)
 

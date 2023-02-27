@@ -84,11 +84,32 @@ class User:
         }
         return user_doc
 
-    # ユーザーの情報をすべて返す
+    # ユーザーのパスワードを再設定する関数
+    def put_user(self, user_id: int, user):
+        access_user = self.user_data.find_one({"id": user_id}, {"_id": False})
+
+        # ユーザーが管理者かどうかを確認する
+        if access_user["admin"]: # ユーザーが管理者のとき
+            temp = f"{user.name}{user.password}"
+            self.user_data.update_one({"name": user.name}, {"$set": {"password": hashlib.sha256(temp.encode("UTF-8")).hexdigest()}})
+            return "change password"
+        else: # ユーザーが管理者でないとき
+            return "Not admin"
+
+    # 管理者な全ユーザーの情報を返す関数
     def get_users(self, user_id: int):
-        users = self.user_data.find({}, {"_id": False})
+        users = list(self.user_data.find({}, {"_id": False}))
+        is_admin = False
+        names = []
+        # 全ユーザーの名前のリストを作成し管理者かどうかを確認する
         for user in users:
-            if user["id"] == user_id: # JWTから取得したユーザーがDBに存在するか確認
-                if user["admin"]: # ユーザーが管理者か確認
-                    return len(list(users))
-        return "Not admin"
+            names.append(user["name"])
+            # 通信したユーザーが管理者か確認する
+            try:
+                if user["id"] == user_id and user["admin"]: # JWTから取得したユーザーがDBに存在し管理者であるか確認
+                    is_admin = True
+            except KeyError: # 管理者がいないとき
+                return "Not admin"
+        # 管理者ならば全ユーザー名とユーザー数を返す
+        if is_admin:
+            return {"user_count": len(names), "user_names": names}
