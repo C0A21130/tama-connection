@@ -70,12 +70,14 @@ def delete_page(page_id: int):
 
 # マップにピンを表示するための情報を与える関数
 @app.get("/map")
-def get_location(myx:float, myy:float, district=False):
+def get_location(myx:float, myy:float, request="nearby"):
     # ユーザーのリクエストによって分岐
-    if district: # 地区名から検索した情報が欲しいとき
+    if request == "district": # 地区名から検索した情報が欲しいとき
         return map.get_district_form_data()
-    else: # 近場の情報が欲しいとき
+    elif request == "nearby": # 近場の情報が欲しいとき
         return map.get_nearby_data(myx=myx, myy=myy)
+    else:
+        return "Error"
 
 # ユーザーの追加する
 @app.post("/regist")
