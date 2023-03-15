@@ -1,5 +1,6 @@
 from database import DataBase
 import math
+import random
 
 class Map():
 
@@ -42,3 +43,26 @@ class Map():
 
         return result
     
+    #　地区名から検索して返却するメソッド
+    def get_district_form_data(self):
+        # 検索したい地区名を初期化
+        district_list = {"稲城": [], "八王子": [], "東大和": []}
+        # 返却する結果の初期化
+        result = {key : dict() for key in district_list}
+        result["district_list"] = list(district_list.keys())
+        # DBから投稿データを取り出す
+        finds = self.file_data.find({}, {"_id": False})
+        finds = list(finds)
+        # 地区名が書かれている投稿データを検索をする
+        for district in district_list:
+            for find in finds:
+                # 写真のタイトルと投稿場所とテキストに地区名が含まれているかを検索する
+                if district in find["title"] or district in find["location_name"] or district in find["text"]:
+                    district_list[district].append(find)
+        # 検索結果を返却する
+        for district in district_list:
+            try: # 検索結果が複数あるときはランダムに1つだけ返却値に設定する
+                result[district] = random.choice(district_list[district])
+            except IndexError: # 検索結果に存在しない場合は発見できなかったことを伝える
+                result[district] = {"id": -1, "title": "見つかりませんでした", "tag": "kankou", "text": "", "user": -1, "location_name": "", "location": {"x":0, "y": 0}, "image": ""}
+        return result
