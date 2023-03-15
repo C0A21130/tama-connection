@@ -57,8 +57,12 @@ class Map():
         for district in district_list:
             for find in finds:
                 # 写真のタイトルと投稿場所とテキストに地区名が含まれているかを検索する
-                if district in find["title"] or district in find["location_name"] or district in find["text"]:
-                    district_list[district].append(find)
+                try: 
+                    if district in find["title"] or district in find["location_name"] or district in find["text"]:
+                        district_list[district].append(find)
+                except KeyError: # 投稿場所が記入されていないとき
+                    if district in find["title"] or district in find["text"]:
+                        district_list[district].append(find)
         # 検索結果を返却する
         for district in district_list:
             try: # 検索結果が複数あるときはランダムに1つだけ返却値に設定する
