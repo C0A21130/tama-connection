@@ -7,6 +7,7 @@ import model
 from database import DataBase
 from user import User
 from page import Page
+from map import Map
 
 # DBの接続
 db = DataBase()
@@ -16,6 +17,7 @@ file_data = db.get_collection(collection_name="file_data")
 app = FastAPI()
 page = Page()
 user = User()
+map = Map()
 
 # CORSの接続許可
 origins = [
@@ -68,39 +70,12 @@ def delete_page(page_id: int):
 
 # マップにピンを表示するための情報を与える関数
 @app.get("/map")
-def get_location(myx:float, myy:float):
-    # 結果を初期化
-    result = {"page_count": 0, "locations": [], "pages": []}
-    # DBから座標データが存在するもののみ取り出す
-    finds = list(file_data.find({"location":{"$exists": True}}, {"_id" : False}))
-
-    # 位置情報が存在するページ数を結果に代入する
-    result["page_count"] = len(finds)
-    # 距離だけを取り出して結果に代入する
-    for find in finds:
-        location = find["location"]
-        location["distance"] = math.sqrt((location["x"] - myx)**2 + (location["y"] - myy)**2)
-        result["locations"].append({"location": location, "page_id": find["page_id"]})
-    # 近場のページを取り出す
-    for i in range(len(result["locations"])):
-        for j in range(len(result["locations"]) - i - 1):
-            if result["locations"][j]["location"]["distance"] > result["locations"][j + 1]["location"]["distance"]:
-                tmp = result["locations"][j]
-                result["locations"][j] = result["locations"][j+1]
-                result["locations"][j+1] = tmp
-    # 近場のページの結果を3つ代入する
-    for find in finds:
-        # 最も近場のページを追加
-        if find["page_id"] == result["locations"][2]["page_id"]:
-            result["pages"].append(find)
-        # 次に近場のページを追加
-        elif find["page_id"] == result["locations"][1]["page_id"]:
-            result["pages"].append(find)
-        # 3番目に近場のページを追加
-        elif find["page_id"] == result["locations"][0]["page_id"]:
-            result["pages"].append(find)
-
-    return result
+def get_location(myx:float, myy:float, district=False):
+    # ユーザーのリクエストによって分岐
+    if district: # 地区名から検索した情報が欲しいとき
+        return map.get_district_form_data()
+    else: # 近場の情報が欲しいとき
+        return map.get_nearby_data(myx=myx, myy=myy)
 
 # ユーザーの追加する
 @app.post("/regist")
