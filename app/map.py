@@ -46,7 +46,7 @@ class Map():
     #　地区名から検索して返却するメソッド
     def get_district_form_data(self):
         # 検索したい地区名を初期化
-        district_list = {"稲城": [], "八王子": [], "東大和": []}
+        district_list = {"稲城": [], "八王子": [], "東大和": [], "西東京": []}
         # 返却する結果の初期化
         result = {key : dict() for key in district_list}
         result["district_list"] = list(district_list.keys())
