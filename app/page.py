@@ -12,6 +12,9 @@ class Page:
 
         # 指定したページ番号から情報を取得する
         search_result: dict = file_data.find_one({"page_id" : page_id}, {"_id" : False})
+        #　ユーザーIDからユーザー数に変換
+        for status in ["good", "went", "go"]:
+            search_result[status] = len(search_result[status])
 
         return search_result
 
@@ -29,6 +32,10 @@ class Page:
 
         # 取得したデータを分類する
         for doc in list(self.file_data.find({},{"_id":False})):
+            # ユーザーIDからユーザー数に変換
+            for status in ["good", "went", "go"]:
+                doc[status] = len(doc[status])
+
             if (doc["tag"] == "kankou"):
                 kankou.append(doc)
             elif (doc["tag"] == "gurume"):
@@ -80,7 +87,10 @@ class Page:
                 "x": page.location.x,
                 "y": page.location.y
             },
-            "image" : page.image
+            "image" : page.image,
+            "good": [],
+            "went": [],
+            "go": []
         }
 
         # 新しく作成したデータをDBに追加
