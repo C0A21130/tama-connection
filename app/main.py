@@ -2,12 +2,12 @@ from fastapi import FastAPI, Header
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.middleware.gzip import GZipMiddleware
 import uvicorn
-import math
 import model
 from database import DataBase
 from user import User
 from page import Page
 from map import Map
+from point import Point
 
 # DBの接続
 db = DataBase()
@@ -18,6 +18,7 @@ app = FastAPI()
 page = Page()
 user = User()
 map = Map()
+point = Point()
 
 # CORSの接続許可
 origins = [
@@ -106,6 +107,12 @@ def put_user(user_response: model.User, token: str = Header(None)):
 def get_users(token: str = Header(None)):
     user_id = User.get_id(token=token)
     return user.get_users(user_id=user_id)
+
+# いいねや行ってみた、行ったことがあるを追加する
+@app.put("/point")
+def put_point(page_id:int, status: str, token: str = Header(None)):
+    user_id = User.get_id(token=token)
+    return point.increment_status(page_id=page_id, user_id=user_id, status=status)
 
 if __name__ == "__main__":
     uvicorn.run(app=app, port=8000)
