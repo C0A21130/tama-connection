@@ -6,7 +6,7 @@ class Point():
         self.db = DataBase()
         self.file_data = self.db.get_collection(collection_name="file_data")
 
-    # いいねや追加するメソッド
+    # いいねを追加するメソッド
     def increment_status(self, page_id: int, user_id: int, status: str):
         find = self.file_data.find_one({"page_id": page_id}, {"_id": False})
         # 既に追加されている場合は追加しない
@@ -15,3 +15,8 @@ class Point():
             
         self.file_data.update_one({"page_id": page_id}, {"$push": {status: user_id}})
         return f"{page_id} at {status}"
+
+    # いいねを取り消すメソッド
+    def decrease_status(self, page_id: int, user_id: int, status: str):
+        self.file_data.update_one({"page_id": page_id}, {"$pull": {status: user_id}})
+

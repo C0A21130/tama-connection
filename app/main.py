@@ -114,5 +114,10 @@ def put_point(page_id:int, status: str, token: str = Header(None)):
     user_id = User.get_id(token=token)
     return point.increment_status(page_id=page_id, user_id=user_id, status=status)
 
+@app.delete("/point")
+def delete_point(page_id: int, status: str, token: str = Header(None)):
+    user_id = User.get_id(token=token)
+    return point.decrease_status(page_id=page_id, user_id=user_id, status=status)
+
 if __name__ == "__main__":
     uvicorn.run(app=app, port=8000)
