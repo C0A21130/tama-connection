@@ -49,8 +49,12 @@ def get_pages(tag:str, pageNum:int):
 
 # 1つの投稿されたデータ情報を表示する関数
 @app.get("/page/{page_id}")
-def get_one_page(page_id :int=1):
-    return page.get_one_page(page_id=page_id)
+def get_one_page(page_id :int=1, token: str = Header(None)):
+    if token:
+        user_id = User.get_id(token=token)
+        return page.get_one_page(page_id=page_id, user_id=user_id)
+    else:
+        return page.get_one_page(page_id=page_id, user_id=0)
 
 # 新しい投稿データを追加するための関数
 @app.post("/page")
@@ -109,12 +113,13 @@ def get_users(token: str = Header(None)):
     return user.get_users(user_id=user_id)
 
 # いいねや行ってみた、行ったことがあるを追加する
-@app.put("/point")
+@app.post("/point")
 def put_point(page_id:int, status: str, token: str = Header(None)):
     user_id = User.get_id(token=token)
     return point.increment_status(page_id=page_id, user_id=user_id, status=status)
 
-@app.delete("/point")
+# いいねや行ってみた、行ったことがあるを削除する
+@app.put("/point")
 def delete_point(page_id: int, status: str, token: str = Header(None)):
     user_id = User.get_id(token=token)
     return point.decrease_status(page_id=page_id, user_id=user_id, status=status)

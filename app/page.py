@@ -5,14 +5,22 @@ PAGES_NUM = 3
 class Page:
 
     @classmethod
-    def get_one_page(cls, page_id):
+    def get_one_page(cls, page_id: int, user_id):
         # DBと接続する
         db = DataBase()
         file_data = db.get_collection(collection_name="file_data")
+        user_status = []
 
         # 指定したページ番号から情報を取得する
         search_result: dict = file_data.find_one({"page_id" : page_id}, {"_id" : False})
-        #　ユーザーIDからユーザー数に変換
+        # ユーザーがアカウント登録しているかを確認する
+        for status in ["good", "went", "go"]: 
+            # ユーザーが既にいいねをしていたかを確認する
+            for i in search_result[status]:
+                if i == user_id:
+                    user_status.append(status)
+        search_result["user_status"] = user_status
+        # ユーザーIDからユーザー数に変換
         for status in ["good", "went", "go"]:
             search_result[status] = len(search_result[status])
 
