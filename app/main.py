@@ -50,7 +50,7 @@ def get_pages(tag:str, pageNum:int):
 # 1つの投稿されたデータ情報を表示する関数
 @app.get("/page/{page_id}")
 def get_one_page(page_id :int=1, token: str = Header(None)):
-    if token:
+    if token != "null":
         user_id = User.get_id(token=token)
         return page.get_one_page(page_id=page_id, user_id=user_id)
     else:
