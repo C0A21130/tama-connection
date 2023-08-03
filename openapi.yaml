@@ -330,7 +330,7 @@ paths:
                     type: array
                     items:
                       type: integer
-  "users"
+  "/users"
     get:
       description: 管理者ならユーザーの登録数を取得する
       parameters:
@@ -344,5 +344,47 @@ paths:
           "application/json":
             schema:
               type: int # ユーザー数を返却
-
-    
+  "/point"
+    put:
+      description: いいねを追加する
+      parameters:
+        - name: token
+          in: header
+          required: true
+          shema:
+            type: string # JWT
+      requestBody:
+        description:
+        requrred: true
+        content:
+          application/json:
+            shema:
+              type: object
+              properties:
+                page_id: { type: number, example: 1 },
+                status: { type: string, example: "good"} # good or go or want
+      response:
+        "200":
+          description: 
+          contents:
+            application/json:
+              shema:
+                type: string
+    post:
+      description: いいねを削除する
+      prameters:
+        - name: token
+        in: header
+        required: true
+        shema:
+          type: string # JWT
+      requestBody:
+        description:
+        requrred: true
+        content:
+          application/json:
+            shema:
+              type: object
+              properties:
+                page_id: { type: number, example: 1 },
+                status: { type: string, example: "good"} # good or go or want
