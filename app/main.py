@@ -4,10 +4,10 @@ from fastapi.middleware.gzip import GZipMiddleware
 import uvicorn
 import model
 from database import DataBase
-from user import User
-from page import Page
-from map import Map
-from point import Point
+from lib.user import User
+from lib.page import Page
+from lib.map import Map
+from lib.point import Point
 
 # DBの接続
 db = DataBase()
