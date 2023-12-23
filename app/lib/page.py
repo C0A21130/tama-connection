@@ -81,11 +81,15 @@ class Page:
     # ページの投稿
     def post_page(self, page, user_id: int):
         # DBからファイル名の最大値を読み取る
-        docs = list(self.file_data.find({}, {"_id":False}).sort("page_id", -1))
+        try:
+            docs = list(self.file_data.find({}, {"_id":False}).sort("page_id", -1))
+            page_id = docs[0]["page_id"] + 1
+        except:
+            page_id = 1
 
         # 受けとったjsonデータから新しいページを作成する
         new_page = {
-            "page_id": docs[0]["page_id"] + 1,
+            "page_id": page_id,
             "title": page.title,
             "tag": page.tag,
             "text": page.text,
@@ -104,7 +108,7 @@ class Page:
         # 新しく作成したデータをDBに追加
         self.file_data.insert_one(new_page)
 
-        return docs[0]["page_id"] + 1
+        return page_id
 
     # 投稿したページの変更
     def put_page(self, page_id, page, user_id):
