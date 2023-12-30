@@ -7,14 +7,22 @@ token = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpZCI6MSwiZXgiOiIyMDIzLTAyLTE1ID
 account = {"name": "test3", "password": "testpass"}
 
 def cheack_page_type(page):
-    assert type(page["page_id"]) is int
-    assert type(page["title"]) is str
-    assert type(page["tag"]) is str
-    assert type(page["text"]) is str
-    assert type(page["location_name"]) is str
+    page_types = {
+        "page_id": int,
+        "title": str,
+        "tag": str,
+        "text": str,
+        "location_name": str,
+        "image": str,
+        "good": int,
+        "go": int,
+        "went": int
+    }
+
+    for page_type in page_types:
+        assert type(page[page_type]) is page_types[page_type]
+    
     assert type(page["location"]["x"]) is float
-    assert type(page["image"]) is str
-    assert type(page["good"]) is int
 
 def test_get_pages():
     tag = "kankou"

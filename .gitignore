@@ -129,3 +129,4 @@ dmypy.json
 
 # original
 mongodb_data/
+mysql/db

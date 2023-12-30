@@ -37,3 +37,7 @@ services:
       ME_CONFIG_MONGODB_SERVER: mongo
     depends_on:
       - mongo
+networks:
+  default:
+    name: switch_db
+    external: true
