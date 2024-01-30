@@ -6,6 +6,7 @@ import hashlib
 from sqlalchemy.orm import Session
 
 import model
+from lib.page import Page
 
 load_dotenv("./.env")
 KEY = os.getenv("KEY")
@@ -101,6 +102,17 @@ class User:
             return {"user_count": len(users), "user_names": names}
         else:
             return None
+
+    # ユーザーの投稿と名前の情報を返す関数
+    def get_user(self, user_id: int, session: Session) -> dict:
+        p = []
+        user = session.query(model.Users).filter(model.Users.id == user_id).first()
+        pages = session.query(model.Pages).filter(model.Pages.user_id == user_id).all()
+        points = session.query(model.Points).all()
+        for page in pages:
+            p.append(Page.convert_page(page=page, points=points))
+
+        return {"name": user.name, "files": p}
 
     # ユーザーのパスワードを再設定する関数
     def put_user(self, user_id: int, user: model.ResponseUser, session: Session) -> bool:

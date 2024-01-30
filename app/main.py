@@ -114,6 +114,16 @@ def get_users(token: str = Header(None), session: Session = Depends(get_db)):
     else:
         return result
 
+# ユーザーの名前と投稿データ一覧を取得する
+@app.get("/user")
+def get_user(token: str = Header(None), session: Session = Depends(get_db)):
+    user_id = User.get_id(token=token)
+    result = user.get_user(user_id=user_id, session=session)
+    if result == None:
+        raise HTTPException(status_code=404, detail="No user or pages")
+    else:
+        return result
+
 # 管理者ならばユーザーのパスワードを再設定する
 @app.put("/user")
 def put_user(user_response: model.ResponseUser, token: str = Header(None), session: Session = Depends(get_db)):
