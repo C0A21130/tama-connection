@@ -48,33 +48,43 @@
 - 行ったことがある
 
 ## 技術の仕様
-このアプリはPythonを使ったWebアプリです。投稿された写真の位置情報やタグ、タイトルなどのメタデータをDBに保存やフロントエンドに送信などをREST APIのルールに従って行います。より詳しいAPIの仕様はOPENAPIを確認してください。
-![azure drawio](https://github.com/C0A21130/tama-connection/assets/85671824/bb694f76-a3f6-48e8-abb3-35aa5f2c6a9b)
+このアプリはPythonを使ったWebアプリです。投稿された写真の位置情報やタグ、タイトルなどのメタデータをDBに保存やフロントエンドに送信などをREST APIのルールに従って行います。より詳しいAPIの仕様はOPEN APIを確認してください。
+![architecture](https://github.com/C0A21130/tama-connection/assets/85671824/d54186e1-9312-4ed6-a543-6a40ce9e7ae1)
 
 ### 利用した言語やライブラリ
 - Python
     - FastAPI
     - uvicorn
-    - pymongo
-    - jwt
-- MongoDB
+    - SQLAlchemy
+    - PyMySQL
+    - PyJWT
+    - pytest
+- MySQL
 - Docker
     - docker-compose
 
 ### ディレクトリ構成
 ``` shell
 tama-connection
-├──app
-|   ├─database.py：データベースへ接続する
-|   ├─main.py：APIサーバーのリクエストを振り分けてメソッドを呼び出す
-|   ├─model.py：型を定義する
-|   ├─page.py：投稿(投稿された内容の確認・投稿をDBに保存・投稿された内容の削除など)に関する機能
-|   ├─pint.py：いいね機能
-|   └─user.py：ユーザー(登録・ログイン)に関する
+├─app
+|  ├─lib
+|  |  ├─map.py：
+|  |  ├─page.py：投稿(投稿された内容の確認・投稿をDBに保存・投稿された内容の削除など)に関する機能
+|  |  ├─pint.py：いいね機能
+|  |  └─user.py：ユーザー(登録・ログイン)に関する機能
+|  ├─database.py：データベースへ接続する機能
+|  ├─main.py：APIサーバーのリクエストを振り分けてメソッドを呼び出す
+|  ├─model.py：リクエストボディの型やSQLの型を定義する
+|  └─test.py：テストコード
+├─mysql
+|  ├─docker-compose.yml：MySQLサーバーのコンテナに関する設定
+|  ├─Dockerfile：MySQLサーバーのコンテナに関する設定
+|  └─my.cnf：MySQLの設定ファイル
+├─.env.sample：設定ファイルのテンプレート(MySQLの接続設定・JWTKEYを書き込む)
 ├─.gitnore
-├─Dockerfile：Dockerに関する設定
-├─docker-compose.yml：複数のコンテナを設定
-├─openapi.yaml：APIの定義
+├─docker-compose.yml：FastAPIサーバーのコンテナを設定
+├─Dockerfile：FastAPIサーバーのコンテナを設定
+├─openapi.yaml：APIの仕様書
 ├─README.md
 └─requirements.txt：Pythonのライブラリを定義
 ```
@@ -89,30 +99,22 @@ $ git clone https://github.com/C0A21130/tama-connection.git
 ``` shell
 $ git switch Develop
 ```
-3. Dockerのコンテナを起動する
+3. 環境変数の設定
+    - テンプレートファイル(.env.sample)をコピーして.envファイルの中身を書き換える
 ``` shell
+$ cp ./.env.sample ./app/.env
+```
+4. Dockerのコンテナを起動する
+    - MySQLサーバーのコンテナを起動
+    - Fast APIサーバーのコンテナを起動
+``` shell
+$ cd mysql
+$ docker-compose up -d
+```    
+``` shell
+$ cd ..
 $ docker-compose up -d
 ```
-4. バックエンドサーバーへアクセスする
+5. バックエンドサーバーへアクセスする
     - バックエンドサーバー：[http://localhost:5000](http://localhost:5000)
-    - DBサーバー：[http://localhost:8081](http://localhost:8081)
 
-
-### デプロイ方法
-1. GitHubからリポジトリをクローン
-``` shell
-$ git clone https://github.com/C0A21130/tama-connection.git
-```
-2. Pythonのライブラリのインストール
-``` shell
-$ pip install -r requirements.txt
-```
-3. ディレクトリを変更する
-``` shell
-$ cd app
-```
-4. アプリを起動する
-``` shell
-$ python3 main.py
-```
-5. アプリへアクセスする

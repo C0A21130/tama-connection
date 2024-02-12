@@ -1,17 +1,19 @@
 openapi: "3.0.3"
 info:
   title: "tama-connection"
-  version: "1.0.0"
+  version: "2.0.0"
 servers:
   - url: "http://localhost:5000"
     description: "ローカル環境"
-  - url: "http://tk2-123-61896.vs.sakura.ne.jp/api/"
+  - url: "http://tama-connect.com/api/"
     description: "本番環境"
 tags: 
   - name: "user"
     description: "ユーザーに関する操作"
   - name: "page"
     description: "投稿ページに関する操作"
+  - name: "point"
+    description: "ポイント(いいねや行ったことがある、行ってみたい)に関する操作"
 paths:
   "/"
     get:
@@ -85,6 +87,7 @@ paths:
   "/page/{page_id}"
     get:
       description: 投稿されたページを1つ取得
+      tags: ["page"]
       parameters:
         - name: page_id
           in: path
@@ -115,47 +118,11 @@ paths:
                         type: number
                   image:
                     type: string # 画像データ(BASE64)
-    put:
-      description: 投稿データの更新
-      parameters:
-        - name: page_id
-          in: path
-          required: true
-          schema:
-            type: integer
-        - name: token
-          in: heder
-          required: true
-          schema:
-            type: string
-      requestBody:
-        content:
-          "application/json":
-            schema:
-              title:
-                type: string
-              tag:
-                type: string # kankou or gurume or tamasanpo or omiyage
-              text:
-                type: string
-              location:
-                type: object
-                properties:
-                  x:
-                    type: number
-                  y:
-                    type: number
-              image:
-                type: string # 画像データ(BASE64)
-      responses:
-        "200":
-          description:
-          content:
-            "aplication/json":
-              schema:
-                type: integer # 投稿データの番号
+        "404":
+          description: Article with id {page_id} not found
     delete:
       description: 投稿データの削除
+      tags: ["page"]
       parameters:
         - name: page_id
           in: path
@@ -169,9 +136,12 @@ paths:
             "application/json":
               schema:
                 type: integer # 削除した投稿データのID
+        "404":
+          description: No delte article {page_id}
   "/page"
     post:
       description: 投稿データの追加
+      tags: ["page"]
       parameters:
         - name: token
           in: header
@@ -202,6 +172,7 @@ paths:
   "/map"
     get:
       description: 位置情報の取得
+      tags: ["page"]
       parameters:
         - name: myx
           in: query
@@ -263,6 +234,7 @@ paths:
   "/regist"
     post:
       description: ユーザーの登録
+      tags: ["user"]
       requestBody:
         content:
           "application/json":
@@ -285,6 +257,7 @@ paths:
   "/login"
     post:
       description: ユーザーのログイン
+      tags: ["user"]
       requestBody:
         content:
           "application/json":
@@ -306,6 +279,7 @@ paths:
   "/user"
     get:
       description: ユーザー情報の取得
+      tags: ["user"]
       parameters:
         - name: token
           in: header
@@ -333,6 +307,7 @@ paths:
   "/users"
     get:
       description: 管理者ならユーザーの登録数を取得する
+      tags: ["users"]
       parameters:
         - name: token
           in: header
@@ -340,13 +315,53 @@ paths:
           schema:
             type: string # JWT
       responses:
-        content:
-          "application/json":
-            schema:
-              type: int # ユーザー数を返却
-  "/point"
+        "200":
+          content:
+            "application/json":
+              schema:
+                type: int # ユーザー数を返却
     put:
+      description: 理者ならばユーザーのパスワードを再設定する
+      tags: ["users"]
+      parameters:
+        - name: token
+          in: header
+          required: true
+          schema:
+            type: string # JWT
+      requestBody:
+        content:
+          application/json:
+            schema:
+              name:
+                type: str
+              password:
+                type: str
+      responses:
+        "200":
+          description: Changed user password
+    delete:
+      description: 管理者ならばユーザーを削除する
+      tags: ["users"]
+      parameters:
+        - name: token
+          in: header
+          required: true
+          schema:
+            type: string # JWT
+      requestBody:
+        content:
+          application/json:
+            schema:
+              name:
+                type: str
+      responses:
+        "200":
+          description: Success to delete user id {user_id}
+  "/point"
+    post:
       description: いいねを追加する
+      tags: ["point"]
       parameters:
         - name: token
           in: header
@@ -370,14 +385,15 @@ paths:
             application/json:
               shema:
                 type: string
-    post:
+    put:
       description: いいねを削除する
+      tags: ["point"]
       prameters:
         - name: token
-        in: header
-        required: true
-        shema:
-          type: string # JWT
+          in: header
+          required: true
+          shema:
+            type: string # JWT
       requestBody:
         description:
         requrred: true
