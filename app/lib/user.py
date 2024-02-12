@@ -1,18 +1,18 @@
+import os
+from dotenv import load_dotenv
 import datetime
 import jwt
 import hashlib
-from database import DataBase
+from sqlalchemy.orm import Session
 
-KEY = ""
+import model
+from lib.page import Page
+
+load_dotenv("./.env")
+KEY = os.getenv("KEY")
 
 # ユーザー情報のクラス
 class User:
-
-    def __init__(self):
-        # ユーザーDBの接続
-        self.db = DataBase()
-        self.user_data = self.db.get_collection(collection_name="user_data")
-        self.file_data = self.db.get_collection(collection_name="file_data")
 
     # JWTのトークンを生成する
     @classmethod
@@ -37,79 +37,100 @@ class User:
         return user_id
 
     # ユーザーの情報を追加
-    def regist(self, user):
-        # ユーザー数の確認
-        num = self.user_data.count_documents({})
+    def regist(self, user: model.ResponseUser, session: Session):
+        # 入力内容をオブジェクトへ初期化
+        new_user = model.Users(
+            name = user.name,
+            password = hashlib.sha256(f"{user.name}{user.password}".encode("UTF-8")).hexdigest(),
+            admin = False,
+            taxi = False
+        )
+
+        # DBへ入力されたユーザー名を検索
+        find = session.query(model.Users).filter(model.Users.name == user.name).first()
+
+        # 同じ名前の人が存在するか確認しいなければDBに追加する
+        if (find == None):
+            try:
+                # DBにユーザーの情報を追加
+                session.add(new_user)
+                session.flush()
+                session.commit()
+
+                # JWTを作成
+                token = User.cleate_token(new_user.id)
+                return {"token" : token}
+            except:
+                session.rollback()
+
+    # ユーザーがDBにあるか確認して存在すればJWTを返却する
+    def login(self, user: model.ResponseUser, session: Session):
+        # パスワードのハッシュ値を生成
         temp = f"{user.name}{user.password}"
+        pasword = hashlib.sha256(temp.encode("UTF-8")).hexdigest()
 
-        user_doc = {
-            "id" : num + 1,
-            "name" : user.name,
-            "password" : hashlib.sha256(temp.encode("UTF-8")).hexdigest(),
-            "checked" : []
-        }
-
-        # 同じ名前の人が存在するか確認
-        find = self.user_data.find_one({"name" : user.name}, {"_id" : False})
-
-        if (find):
-            return {"token" : "exist name"}
-        else:
-            # DBにユーザーの情報を追加
-            self.user_data.insert_one(user_doc)
-            token= User.cleate_token(user_doc["id"])
-
-            # 作成したユーザーのIDを返す
-            return {"token" : token}
-
-    # ユーザーがDBにあるか確認して存在すればIDを返却する
-    def login(self, user):
-        temp = f"{user.name}{user.password}"
-        find = self.user_data.find_one({"$and":[{"name":user.name},{"password":hashlib.sha256(temp.encode("UTF-8")).hexdigest()}]}, {"_id": False})
-        user_id = find["id"]
-        token = User.cleate_token(user_id=user_id)
-
+        # DBからユーザー名とパスワードで検索
+        find = session.query(model.Users).filter(model.Users.name == user.name, model.Users.password == pasword).first()
+        
+        # JWTトークンを再作成
+        token = User.cleate_token(user_id=find.id)
         return {"token" : token}
 
-    # ユーザーの情報を返す
-    def get_user(self, user_id):
-
-        find = self.user_data.find_one({"id": user_id}, {"_id": False})
-        files = self.file_data.find({"user":user_id}, {"_id":False})
-        # 返せる情報のみを抜き出して返す
-        user_doc = {
-            "name" : find["name"],
-            "checked" : find["checked"],
-            "files" : list(files)
-        }
-        return user_doc
-
-    # ユーザーのパスワードを再設定する関数
-    def put_user(self, user_id: int, user):
-        access_user = self.user_data.find_one({"id": user_id}, {"_id": False})
-
-        # ユーザーが管理者かどうかを確認する
-        if access_user["admin"]: # ユーザーが管理者のとき
-            temp = f"{user.name}{user.password}"
-            self.user_data.update_one({"name": user.name}, {"$set": {"password": hashlib.sha256(temp.encode("UTF-8")).hexdigest()}})
-            return "change password"
-        else: # ユーザーが管理者でないとき
-            return "Not admin"
+    # ユーザーの情報をDBから削除する
+    def del_user(self, name: str, user_id: int, session: Session):
+        try:
+            # DBからIDとユーザー名が一致していればユーザーを消去する
+            session.query(model.Users).filter(model.Users.id == user_id, model.Users.name == name).delete()
+            session.commit()
+            return user_id
+        except:
+            session.rollback()
 
     # 管理者な全ユーザーの情報を返す関数
-    def get_users(self, user_id: int):
-        users = list(self.user_data.find({}, {"_id": False}))
+    def get_users(self, user_id: int, sesstion: Session) -> dict:
+        users = sesstion.query(model.Users).all()
         is_admin = False
         names = []
         # 全ユーザーの名前のリストを作成し管理者かどうかを確認する
         for user in users:
-            names.append(user["name"])
+            names.append(user.name)
             # 通信したユーザーが管理者か確認する
-            try:
-                if user["id"] == user_id and user["admin"]: # JWTから取得したユーザーがDBに存在し管理者であるか確認
-                    is_admin = True
-            except KeyError: # 管理者がいないとき
-                return "Not admin"
+            if user.id == user_id and user.admin: # JWTから取得したユーザーがDBに存在し管理者であるか確認
+                is_admin = True
         # 管理者ならば全ユーザー名とユーザー数を返す
         if is_admin:
-            return {"user_count": len(names), "user_names": names}
+            return {"user_count": len(users), "user_names": names}
+        else:
+            return None
+
+    # ユーザーの投稿と名前の情報を返す関数
+    def get_user(self, user_id: int, session: Session) -> dict:
+        p = []
+        user = session.query(model.Users).filter(model.Users.id == user_id).first()
+        pages = session.query(model.Pages).filter(model.Pages.user_id == user_id).all()
+        points = session.query(model.Points).all()
+        for page in pages:
+            p.append(Page.convert_page(page=page, points=points))
+
+        return {"name": user.name, "files": p}
+
+    # ユーザーのパスワードを再設定する関数
+    def put_user(self, user_id: int, user: model.ResponseUser, session: Session) -> bool:
+        called_user = session.query(model.Users).filter(model.Users.id == user_id).first()
+
+        # ユーザーが管理者かどうかを確認してから変更する
+        try:
+            if called_user.admin:
+                temp = f"{user.name}{user.password}"
+                password = hashlib.sha256(temp.encode("UTF-8")).hexdigest()
+
+                # DBの値を更新する
+                target_user = session.query(model.Users).filter(model.Users.name == user.name).first()
+                target_user.password = password
+                session.commit()
+                return True
+            else:
+                return False
+        except:
+            session.rollback()
+            return False

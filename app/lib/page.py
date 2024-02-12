@@ -1,59 +1,95 @@
-from database import DataBase
+from typing import List
+from sqlalchemy.orm import Session
+
+import model
 
 PAGES_NUM = 3
 
 class Page:
+    
+    @classmethod
+    def convert_page(cls, page: model.Pages, points: List[model.Points]) -> dict:
+        result = dict()
+        tags = ["kankou", "gurume", "tamasanpo", "omiyage"]
+        point_tags = ["good", "go", "went"]
+        # オブジェクトから辞書へ変換
+        result["page_id"] = page.id
+        result["title"] = page.title
+        result["tag"] = tags[int(page.tag) - 1]
+        result["text"] = page.text
+        result["location_name"] = page.location_name
+        result["location"] = {
+            "x": page.lng,
+            "y": page.lat
+        }
+        result["image"] = page.image
+        result["good"] = 0
+        result["went"] = 0
+        result["go"] = 0
+
+        # ポイントオブジェクトが引数にないときは終了する
+        if points == None:
+            return result
+
+        # ポイント(goodなど)を要素数を数える
+        for point in points:
+            if page.id == point.page_id:
+                index = point_tags[int(point.point)-1]
+                result[index] += 1
+
+        return result
 
     @classmethod
-    def get_one_page(cls, page_id: int, user_id):
-        # DBと接続する
-        db = DataBase()
-        file_data = db.get_collection(collection_name="file_data")
-        user_status = []
+    def get_one_page(cls, page_id: int, user_id: int, session: Session):
+        result = dict()
 
-        # 指定したページ番号から情報を取得する
-        search_result: dict = file_data.find_one({"page_id" : page_id}, {"_id" : False})
-        # ユーザーがアカウント登録しているかを確認する
-        for status in ["good", "went", "go"]: 
-            # ユーザーが既にいいねをしていたかを確認する
-            for i in search_result[status]:
-                if i == user_id:
-                    user_status.append(status)
-        search_result["user_status"] = user_status
-        # ユーザーIDからユーザー数に変換
-        for status in ["good", "went", "go"]:
-            search_result[status] = len(search_result[status])
+        # DBから一つのページ情報を取得する
+        page = session.query(model.Pages).filter(model.Pages.id == page_id).first()
+        # DBから複数のポイントを確認する
+        points = session.query(model.Points).filter(model.Points.page_id == page_id).all()
+        
+        # 情報を変換する  
+        result = cls.convert_page(page, None)
+        result["user_status"] = list()
+        point_tags = ["good", "go", "went"]
+        # ポイント(goodなど)を要素数を数える
+        for point in points:
+            index = point_tags[int(point.point)-1]
+            result[index] += 1
+            # もしユーザーだったら返却値に追加する
+            if point.user_id == user_id:
+                result["user_status"].append(index)
+        
+        return result
 
-        return search_result
-
-    def __init__(self):
-        self.db = DataBase()
-        self.file_data = self.db.get_collection(collection_name="file_data")
-    
     # 複数ページを取得する
-    def get_pages(self, tag, page_num):
-        # リストの初期化
+    def get_pages(self, tag: str, page_num: int, session: Session) -> dict:
+        result = dict()
         kankou = list()
         gurume = list()
         tamasanpo = list()
         omiyage = list()
 
+        # DBから一つのページ情報を取得する
+        pages = session.query(model.Pages).all()
+        # DBから複数のポイントを確認する
+        points = session.query(model.Points).all()
+
         # 取得したデータを分類する
-        for doc in list(self.file_data.find({},{"_id":False})):
-            # ユーザーIDからユーザー数に変換
-            for status in ["good", "went", "go"]:
-                doc[status] = len(doc[status])
+        for page in pages:
+            # オブジェクトを辞書に変換
+            result = self.convert_page(page, points)
 
-            if (doc["tag"] == "kankou"):
-                kankou.append(doc)
-            elif (doc["tag"] == "gurume"):
-                gurume.append(doc)
-            elif (doc["tag"] == "tamasanpo"):
-                tamasanpo.append(doc)
+            if (result["tag"] == "kankou"):
+                kankou.append(result)
+            elif (result["tag"] == "gurume"):
+                gurume.append(result)
+            elif (result["tag"] == "tamasanpo"):
+                tamasanpo.append(result)
             else:
-                omiyage.append(doc)
+                omiyage.append(result)
 
-        # 数を数える
+        # タグごとの要素数を数える
         max_page = {
             "kankou": len(kankou), 
             "gurume": len(gurume),
@@ -79,55 +115,37 @@ class Page:
             return {"result":omiyage[start_index : start_index+PAGES_NUM], "max":max_page}
 
     # ページの投稿
-    def post_page(self, page, user_id: int):
-        # DBからファイル名の最大値を読み取る
-        try:
-            docs = list(self.file_data.find({}, {"_id":False}).sort("page_id", -1))
-            page_id = docs[0]["page_id"] + 1
-        except:
-            page_id = 1
-
+    def post_page(self, page: model.ResponsePage, user_id: int, session: Session) -> dict:
         # 受けとったjsonデータから新しいページを作成する
-        new_page = {
-            "page_id": page_id,
-            "title": page.title,
-            "tag": page.tag,
-            "text": page.text,
-            "user": user_id,
-            "location_name": page.location_name,
-            "location": {
-                "x": page.location.x,
-                "y": page.location.y
-            },
-            "image" : page.image,
-            "good": [],
-            "went": [],
-            "go": []
-        }
+        new_page = model.Pages(
+            title = page.title,
+            tag = page.tag,
+            text = page.text,
+            user_id = user_id,
+            image = page.image,
+            location_name = page.location_name,
+            lng = page.location.x,
+            lat = page.location.y
+        )
 
         # 新しく作成したデータをDBに追加
-        self.file_data.insert_one(new_page)
-
-        return page_id
-
-    # 投稿したページの変更
-    def put_page(self, page_id, page, user_id):
-        update_page = {
-            "page_id": page_id,
-            "title": page.title,
-            "tag": page.tag,
-            "text": page.text,
-            "user": user_id,
-            "location": {
-                "x": page.location.x,
-                "y": page.location.y
-            },
-            "image": page.image
-        }
-        self.file_data.replace_one({"page_id":page_id}, update_page)
-        return page_id
+        try:
+            session.add(new_page)
+            session.flush()
+        except:
+            session.rollback()
+            return False
+        finally:
+            session.commit()
+            return True
 
     # ページの削除
-    def delete_page(self, page_id):
-        self.file_data.delete_one({"page_id": page_id})
-        return page_id
+    def delete_page(self, page_id: int, session: Session):
+        try:
+            session.query(model.Pages).filter(model.Pages.id == page_id).delete()
+            session.commit()
+            return True
+        except:
+            session.rollback()
+            return False
+        
